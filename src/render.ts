@@ -118,21 +118,27 @@ export class Renderer {
     armPivot(-.33,pose.armL-(pose.armL?0:pose.legSwing*.7)+pose.slump*.1); armPivot(.33,pose.armR+(pose.armR?0:pose.legSwing*.7)+pose.slump*.1);
     const head=chain(spine,translate(0,.72,0),rotX(pose.slump*.4+stoop*.2-pose.look*.75));
     part(0,.21,0,.42,.42,.42,skin,head);
-    if(hairStyle!=="bald"){ part(0,.42,-.02,.46,.14,.46,hair,head); part(0,hairStyle==="long"?.08:.25,-.2,.46,hairStyle==="long"?.62:.3,.08,hair,head); }
+    if(hairStyle!=="bald"){ part(0,.42,.005,.47,.14,.47,hair,head); part(0,hairStyle==="long"?.08:.25,-.2,.46,hairStyle==="long"?.62:.3,.08,hair,head); }
     else part(0,.42,0,.3,.05,.3,skin,head);
+    if(look.chief){ const gold:Vec3=[.86,.68,.24];
+      part(0,.61,0,.68,.13,.38,[cloth[0]*.62,cloth[1]*.62,cloth[2]*.62],spine);
+      part(0,.34,.16,.13,.6,.025,gold,spine);
+      part(0,.055,0,.57,.09,.35,gold,spine);
+      part(0,.46,0,.5,.07,.5,gold,head);
+      part(0,.6,0,.34,.22,.34,[cloth[0]*.55,cloth[1]*.55,cloth[2]*.55],head); }
     const eyes:Vec3=[.07,.06,.06]; part(-.1,.24,.215,.06,.06,.02,eyes,head); part(.1,.24,.215,.06,.06,.02,eyes,head);
   }
   private setup(sky:Sky,eye:Vec3,at:Vec3,t:number,far:number,clear:Vec3=sky.sky,fogFar=120){
     const g=this.gl,c=g.canvas as HTMLCanvasElement; g.viewport(0,0,c.width,c.height);
     g.clearColor(clear[0],clear[1],clear[2],1); g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
-    g.uniformMatrix4fv(this.u.uVP,false,chain(perspective(.72,c.width/c.height,.1,far),lookAt(eye,at)));
+    g.uniformMatrix4fv(this.u.uVP,false,chain(perspective(.72,c.width/c.height,.25,far),lookAt(eye,at)));
     g.uniform1f(this.u.uTime,t); g.uniform3fv(this.u.uSun,normV(sky.sun)); g.uniform3fv(this.u.uSunCol,sky.sunCol); g.uniform3fv(this.u.uAmb,sky.amb); g.uniform3fv(this.u.uFog,clear); g.uniform3fv(this.u.uEye,eye); g.uniform1f(this.u.uFogFar,fogFar);
   }
   private crowdAt(c:NonNullable<Scene["crowd"]>,t:number,terrain:Terrain){
     const q=rng(c.seed),cloths:Vec3[]=[[.2,.5,.46],[.7,.34,.3],[.76,.6,.25],[.4,.36,.6],[.36,.56,.34],[.62,.44,.3],[.72,.68,.56]],hairs:Vec3[]=[[.14,.1,.08],[.3,.2,.11],[.55,.53,.48],[.1,.1,.13]];
     for(let i=0;i<c.count;i++){
       const a=q()*Math.PI*2,d=c.radius[0]+q()*(c.radius[1]-c.radius[0]),x=c.center[0]+Math.cos(a)*d,z=c.center[1]+Math.sin(a)*d,woman=q()<.5,phase=q()*6,height=.82+q()*.2;
-      const look:Look={clothes:cloths[Math.floor(q()*cloths.length)],hair:hairs[Math.floor(q()*hairs.length)],skin:[.82+q()*.1,.62+q()*.1,.46+q()*.1],height,hairStyle:woman?"long":q()<.15?"bald":"short",stoop:0,skirt:woman};
+      const look:Look={clothes:cloths[Math.floor(q()*cloths.length)],hair:hairs[Math.floor(q()*hairs.length)],skin:[.82+q()*.1,.62+q()*.1,.46+q()*.1],height,hairStyle:woman?"long":q()<.15?"bald":"short",stoop:0,skirt:woman,chief:false};
       const pose:Pose={...idlePose(),x,z,yaw:Math.atan2(c.center[0]-x,c.center[1]-z)};
       if(c.cheer){ pose.armR=-2.7+Math.sin(t*8+phase)*.4; if(i%2) pose.armL=pose.armR; pose.hop=Math.abs(Math.sin(t*6+phase))*.14; }
       this.actor(look,pose,terrain);
@@ -140,7 +146,7 @@ export class Renderer {
     let n=0;
     for(const l of c.lines) for(let i=0;i<l.count;i++){
       const f=l.count>1?i/(l.count-1):0,x=lerp(l.from[0],l.to[0],f),z=lerp(l.from[1],l.to[1],f)+(q()-.5)*.25,woman=q()<.5,child=q()<.14,phase=q()*6;
-      const look:Look={clothes:cloths[Math.floor(q()*cloths.length)],hair:hairs[Math.floor(q()*hairs.length)],skin:[.82+q()*.1,.62+q()*.1,.46+q()*.1],height:child?.66:.86+q()*.14,hairStyle:woman?"long":"short",stoop:0,skirt:woman};
+      const look:Look={clothes:cloths[Math.floor(q()*cloths.length)],hair:hairs[Math.floor(q()*hairs.length)],skin:[.82+q()*.1,.62+q()*.1,.46+q()*.1],height:child?.66:.86+q()*.14,hairStyle:woman?"long":"short",stoop:0,skirt:woman,chief:false};
       const pose:Pose={...idlePose(),x,z,yaw:l.face};
       if(c.tug){ const w=Math.sin(t*7+phase); pose.armR=pose.armL=-1.5; pose.hold=true; pose.lean=.25+w*.1; pose.legSwing=w*.25; }
       if(c.fallAt!==undefined){ pose.fall=ease((t-c.fallAt-n*.05)/.35); if(pose.fall>0){ pose.armR=pose.armL=0; pose.hold=false; pose.lean=0; } }
@@ -190,7 +196,7 @@ export class Renderer {
   }
 }
 
-const DEMO_A:Look={clothes:[.25,.42,.58],hair:[.17,.12,.09],skin:[.9,.72,.56],height:1,hairStyle:"short",stoop:0,skirt:false},DEMO_B:Look={clothes:[.62,.36,.26],hair:[.1,.1,.13],skin:[.84,.64,.48],height:.96,hairStyle:"long",stoop:0,skirt:true};
+const DEMO_A:Look={clothes:[.25,.42,.58],hair:[.17,.12,.09],skin:[.9,.72,.56],height:1,hairStyle:"short",stoop:0,skirt:false,chief:false},DEMO_B:Look={clothes:[.62,.36,.26],hair:[.1,.1,.13],skin:[.84,.64,.48],height:.96,hairStyle:"long",stoop:0,skirt:true,chief:false};
 function demoScene(verb:string,target:boolean):Scene{
   const actions=[{actor:"A",verb:verb as Scene["actions"][number]["verb"],target:target?"B":undefined,start:.2,end:2.4}];
   const mutual=verb.includes("引っ張り合う");
@@ -207,14 +213,38 @@ export function drawSubtitle(canvas: HTMLCanvasElement, script: Script, time: nu
   c.textAlign="center"; c.lineJoin="round";
   if(scene.flashback){ c.fillStyle="rgba(120,84,36,.32)"; c.fillRect(0,0,W,H); const g=c.createRadialGradient(W/2,H/2,H*.28,W/2,H/2,H*.68); g.addColorStop(0,"rgba(20,10,0,0)"); g.addColorStop(1,"rgba(20,10,0,.55)"); c.fillStyle=g; c.fillRect(0,0,W,H); }
   c.lineJoin="round";
-  for(const l of scene.labels){ const px=l.x*W,py=l.y*H; c.font=`800 ${W*.075}px ${font}`; const w=c.measureText(l.text).width; c.font=`700 ${W*.036}px ${font}`; const box=Math.max(w,l.sub?c.measureText(l.sub).width:0)+W*.08,bh=l.sub?W*.15:W*.11; c.fillStyle="rgba(250,246,232,.94)"; c.fillRect(px-box/2,py-bh/2,box,bh); c.fillStyle="#17282c"; c.font=`800 ${W*.075}px ${font}`; c.fillText(l.text,px,py+(l.sub?-W*.005:W*.026)); if(l.sub){ c.font=`700 ${W*.036}px ${font}`; c.fillStyle="#52666a"; c.fillText(l.sub,px,py+W*.052); } }
+  for(const l of scene.labels){ const px=l.x*W,py=l.y*H,big=W*.07,small=W*.034; c.font=`700 ${big}px ${font}`; const w=c.measureText(l.text).width; c.font=`700 ${small}px ${font}`; const bw=Math.max(w,l.sub?c.measureText(l.sub).width:0)+W*.07,bh=l.sub?W*.15:W*.105; c.fillStyle="rgba(255,255,255,.88)"; c.strokeStyle="#1a1a1a"; c.lineWidth=W*.004; c.beginPath(); c.roundRect(px-bw/2,py-bh/2,bw,bh,W*.015); c.fill(); c.stroke(); c.textAlign="center"; c.fillStyle="#1a1a1a"; c.font=`700 ${big}px ${font}`; c.fillText(l.text,px,py+(l.sub?-W*.003:W*.025)); if(l.sub){ c.fillStyle="#0017c1"; c.font=`700 ${small}px ${font}`; c.fillText(l.sub,px,py+W*.052); } }
   if(scene.caption){ c.font=`700 ${W*.05}px ${font}`; c.lineWidth=W*.012; c.strokeStyle="rgba(10,20,25,.85)"; c.fillStyle="#fff2c8"; c.strokeText(scene.caption,W/2,H*.17); c.fillText(scene.caption,W/2,H*.17); }
+  const u=W/533,ink="#1a1a1a",key="#0017c1",paper="rgba(255,255,255,.7)";
+  c.textAlign="left"; c.textBaseline="alphabetic";
+  const rounded=(x:number,y:number,w:number,h:number,r:number,tail=false)=>{ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); if(tail){ const tx=x+46*u; c.lineTo(tx+24*u,y+h); c.lineTo(tx+12*u,y+h+15*u); c.lineTo(tx,y+h); } c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); };
   const pop=scene.population;
-  if(script.year!==undefined||pop!==undefined){ const label=[script.year!==undefined?`島に来て${script.year}年目`:"",pop!==undefined?`${pop}人`:""].filter(Boolean).join("　"); c.font=`700 ${W*.046}px ${font}`; c.lineWidth=W*.012; c.strokeStyle="rgba(10,20,25,.85)"; c.fillStyle="#fff"; c.strokeText(label,W/2,H*.1); c.fillText(label,W/2,H*.1); }
+  if(script.year!==undefined||pop!==undefined){
+    const year=script.year!==undefined?`島に来て${script.year}年目`:"",count=pop!==undefined?`${pop}人`:"";
+    c.font=`700 ${29*u}px ${font}`;
+    const pad=17*u,w1=year?c.measureText(year).width+pad*2:0,w2=count?c.measureText(count).width+pad*2:0,x=32*u,y=62*u,h=56*u,r=8*u;
+    rounded(x,y,w1+w2,h,r); c.save(); c.clip(); c.fillStyle=paper; c.fillRect(x,y,w1,h); c.fillStyle=ink; c.fillRect(x+w1,y,w2,h); c.restore();
+    rounded(x,y,w1+w2,h,r); c.lineWidth=2*u; c.strokeStyle=ink; c.stroke();
+    c.fillStyle=ink; c.fillText(year,x+pad,y+h*.69); c.fillStyle="#fff"; c.fillText(count,x+w1+pad,y+h*.69);
+  }
   if(!scene.narration) return;
-  const size=W*.054,max=W*.8; c.font=`700 ${size}px ${font}`;
-  const lines:string[]=[]; for(const para of scene.narration.split("\n")){ let cur=""; for(const ch of para){ if(c.measureText(cur+ch).width>max){ if("、。」』）".includes(ch)){cur+=ch;lines.push(cur);cur="";continue;} lines.push(cur);cur=ch; } else cur+=ch; } if(cur)lines.push(cur); }
-  c.lineWidth=W*.012; c.strokeStyle="rgba(10,20,25,.9)"; c.fillStyle="#fff";
-  const lh=size*1.4,y0=H*.76-(lines.length-1)*lh;
-  lines.forEach((l,i)=>{ c.strokeText(l,W/2,y0+i*lh); c.fillText(l,W/2,y0+i*lh); });
+  type Run={text:string;strong:boolean};
+  const size=36*u,x=30*u,boxW=W-92*u,pad=22*u,maxW=boxW-pad*2;
+  c.font=`700 ${size}px ${font}`;
+  const lines:Run[][]=[];
+  for(const para of scene.narration.split("\n")){
+    let line:Run[]=[],width=0,strong=false;
+    const push=(ch:string)=>{ const last=line[line.length-1]; if(last&&last.strong===strong) last.text+=ch; else line.push({text:ch,strong}); width+=c.measureText(ch).width; };
+    for(const ch of para){
+      if(ch==="["){strong=true;continue;} if(ch==="]"){strong=false;continue;}
+      if(width+c.measureText(ch).width>maxW&&!"、。」』）".includes(ch)){ lines.push(line); line=[]; width=0; }
+      push(ch);
+    }
+    lines.push(line);
+  }
+  const who=scene.speaker??"歴史家シオンの記録",whoSize=21*u,lh=size*1.42,h=15*u+whoSize*1.35+lh*lines.length+12*u,y=H*.6;
+  rounded(x,y,boxW,h,8*u,!!scene.speaker); c.fillStyle=paper; c.fill(); c.lineWidth=2*u; c.strokeStyle=ink; c.stroke();
+  c.font=`700 ${whoSize}px ${font}`; c.fillStyle=key; c.fillText(who,x+pad,y+15*u+whoSize);
+  c.font=`700 ${size}px ${font}`;
+  lines.forEach((line,i)=>{ let px=x+pad; const py=y+15*u+whoSize*1.35+lh*i+size*1.08; for(const run of line){ c.fillStyle=run.strong?key:ink; c.fillText(run.text,px,py); px+=c.measureText(run.text).width; } });
 }

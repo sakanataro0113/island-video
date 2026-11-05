@@ -5,4 +5,4 @@ tags: [漁具]
 states:
   - name: 通常
     parts:
-      - {shape: cylinder, at: [0, 0, 0], rot: [62, 0, 0], radius: 0.025, top: 0.01, height: 2.6, sides: 6, color: "#a98754"}
+      - {shape: cylinder, at: [0, 0, 0], rot: [62, 0, 0], radius: 0.04, top: 0.018, height: 2.6, sides: 6, color: "#a98754"}

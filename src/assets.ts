@@ -13,7 +13,7 @@ export type Part = PartBase & (
   | { shape: "sphere"; scale: Vec3; detail: number; jitter: number; seed: number }
   | { shape: "loft"; sections: [number, number, number, number][] });
 type Base = { id: string; kind: Kind; name: string; tags: string[]; source: string; raw: string; states: string[] };
-export type Look = { clothes: Vec3; hair: Vec3; skin: Vec3; height: number; hairStyle: "short" | "long" | "bald"; stoop: number; skirt: boolean };
+export type Look = { clothes: Vec3; hair: Vec3; skin: Vec3; height: number; hairStyle: "short" | "long" | "bald"; stoop: number; skirt: boolean; chief: boolean };
 export type CharacterAsset = Base & { kind: "人物"; born: number; died?: number; looks: { name: string; fromAge: number; look: Look }[] };
 export type ModelAsset = Base & { kind: "建物" | "小物" | "植物"; parts: Record<string, Part[]> };
 export type PlaceAsset = Base & {
@@ -57,7 +57,7 @@ export function parseAsset(raw: string, source: string): Asset {
     if (!Array.isArray(d.states) || !d.states.length) throw new Error("states がありません。");
     const looks = d.states.map((s: any) => ({
       name: String(s.name), fromAge: num(s.from_age, "from_age"),
-      look: { clothes: hex(s.clothes ?? d.clothes, "clothes"), hair: hex(s.hair ?? d.hair, "hair"), skin: hex(s.skin ?? d.skin, "skin"), height: num(s.height ?? 1, "height"), hairStyle: (["short", "long", "bald"].includes(s.hair_style ?? d.hair_style) ? (s.hair_style ?? d.hair_style) : "short") as Look["hairStyle"], stoop: num(s.stoop ?? 0, "stoop"), skirt: !!(s.skirt ?? d.skirt) },
+      look: { clothes: hex(s.clothes ?? d.clothes, "clothes"), hair: hex(s.hair ?? d.hair, "hair"), skin: hex(s.skin ?? d.skin, "skin"), height: num(s.height ?? 1, "height"), hairStyle: (["short", "long", "bald"].includes(s.hair_style ?? d.hair_style) ? (s.hair_style ?? d.hair_style) : "short") as Look["hairStyle"], stoop: num(s.stoop ?? 0, "stoop"), skirt: !!(s.skirt ?? d.skirt), chief: !!(s.chief ?? d.chief) },
     }));
     if (d.died !== undefined) num(d.died, "died");
     return { ...base, kind: "人物", born: num(d.born, "born"), died: d.died, looks, states: looks.map((l: { name: string }) => l.name) };
