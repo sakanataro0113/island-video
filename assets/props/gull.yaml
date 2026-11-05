@@ -1,0 +1,29 @@
+id: gull
+kind: 小物
+name: 海鳥
+tags: [生き物, 第三勢力]
+states:
+  - name: 羽上げ
+    parts:
+      - {shape: sphere, at: [0, 0, 0], scale: [0.16, 0.16, 0.42], detail: 2, jitter: 0.03, seed: 2, color: "#eef0ec"}
+      - {shape: sphere, at: [0, 0.1, 0.36], scale: [0.13, 0.13, 0.15], detail: 2, jitter: 0.01, seed: 3, color: "#f4f5f1"}
+      - {shape: cone, at: [0, 0.09, 0.47], radius: 0.05, height: 0.2, sides: 6, rot: [90, 0, 0], color: "#e0a02f"}
+      - {shape: box, at: [0.075, 0.13, 0.43], size: [0.02, 0.035, 0.035], color: "#111418"}
+      - {shape: box, at: [-0.075, 0.13, 0.43], size: [0.02, 0.035, 0.035], color: "#111418"}
+      - {shape: box, at: [0, 0.02, -0.45], size: [0.26, 0.04, 0.32], color: "#50565a"}
+      - {shape: box, at: [0.42, 0.2, 0], rot: [0, 0, 28], size: [0.72, 0.035, 0.42], color: "#d6d9d5"}
+      - {shape: box, at: [0.86, 0.48, -0.04], rot: [0, 0, 38], size: [0.42, 0.03, 0.34], color: "#50565a"}
+      - {shape: box, at: [-0.42, 0.2, 0], rot: [0, 0, -28], size: [0.72, 0.035, 0.42], color: "#d6d9d5"}
+      - {shape: box, at: [-0.86, 0.48, -0.04], rot: [0, 0, -38], size: [0.42, 0.03, 0.34], color: "#50565a"}
+  - name: 羽下げ
+    parts:
+      - {shape: sphere, at: [0, 0, 0], scale: [0.16, 0.16, 0.42], detail: 2, jitter: 0.03, seed: 2, color: "#eef0ec"}
+      - {shape: sphere, at: [0, 0.1, 0.36], scale: [0.13, 0.13, 0.15], detail: 2, jitter: 0.01, seed: 3, color: "#f4f5f1"}
+      - {shape: cone, at: [0, 0.09, 0.47], radius: 0.05, height: 0.2, sides: 6, rot: [90, 0, 0], color: "#e0a02f"}
+      - {shape: box, at: [0.075, 0.13, 0.43], size: [0.02, 0.035, 0.035], color: "#111418"}
+      - {shape: box, at: [-0.075, 0.13, 0.43], size: [0.02, 0.035, 0.035], color: "#111418"}
+      - {shape: box, at: [0, 0.02, -0.45], size: [0.26, 0.04, 0.32], color: "#50565a"}
+      - {shape: box, at: [0.42, -0.12, 0], rot: [0, 0, -18], size: [0.72, 0.035, 0.42], color: "#d6d9d5"}
+      - {shape: box, at: [0.82, -0.31, -0.04], rot: [0, 0, -30], size: [0.42, 0.03, 0.34], color: "#50565a"}
+      - {shape: box, at: [-0.42, -0.12, 0], rot: [0, 0, 18], size: [0.72, 0.035, 0.42], color: "#d6d9d5"}
+      - {shape: box, at: [-0.82, -0.31, -0.04], rot: [0, 0, 30], size: [0.42, 0.03, 0.34], color: "#50565a"}

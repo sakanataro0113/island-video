@@ -14,6 +14,7 @@ export function usedIds(script: Script | undefined): Set<string> {
   for (const scene of script.scenes) {
     for (const a of catalog.assets) {
       if (a.kind === "人物" && scene.cast.includes(a.name)) out.add(a.id);
+      if (scene.props.some(p => p.asset === a.id)) out.add(a.id);
       if (a.kind === "動作" && scene.actions.some(x => x.verb === a.name)) out.add(a.id);
       if (a.kind === "場所" && a.name === scene.place) {
         out.add(a.id);

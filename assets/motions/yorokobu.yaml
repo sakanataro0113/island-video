@@ -1,0 +1,6 @@
+id: yorokobu
+kind: 動作
+name: 喜ぶ
+tags: [感情]
+description: 両手を上げて跳ねる
+needs_target: false

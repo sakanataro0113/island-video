@@ -1,0 +1,11 @@
+id: sonchou
+kind: 人物
+name: 村長
+tags: [はま村, 村長]
+born: -47
+clothes: "#d9c58a"
+hair: "#a9a69e"
+skin: "#d3a67f"
+hair_style: bald
+states:
+  - {name: 老年, from_age: 0, height: 0.92, stoop: 0.25}

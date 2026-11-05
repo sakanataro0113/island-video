@@ -1,0 +1,12 @@
+id: takezo
+kind: 人物
+name: タケゾウ
+tags: [もり村, 黒木家, 村長]
+born: -36
+clothes: "#3f2a5c"
+hair: "#35302c"
+skin: "#cc9f79"
+hair_style: short
+states:
+  - {name: 壮年, from_age: 0, height: 1.02}
+  - {name: 老年, from_age: 55, height: 0.92, stoop: 0.35, hair: "#a9a69e"}

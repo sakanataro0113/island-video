@@ -1,0 +1,13 @@
+id: hana
+kind: 人物
+name: ハナ
+tags: [もり村, 黒木家, 漁師]
+born: -20
+clothes: "#c0506a"
+hair: "#2a1a1c"
+skin: "#efc6a2"
+hair_style: long
+skirt: true
+states:
+  - {name: 青年, from_age: 0, height: 0.93}
+  - {name: 老年, from_age: 38, height: 0.86, stoop: 0.3, hair: "#c0beb6", clothes: "#8e5a68", skin: "#d4ad8c"}

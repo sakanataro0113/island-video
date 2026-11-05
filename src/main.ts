@@ -1,4 +1,4 @@
-import { CAMERAS, SAMPLE, TIMES, VERBS, parseScript, type Script } from "./script";
+import { CAMERAS, TIMES, VERBS, parseScript, type Script } from "./script";
 import { catalog, ofKind } from "./assets";
 import { Gallery } from "./gallery";
 import { Renderer, drawSubtitle } from "./render";
@@ -83,7 +83,11 @@ saveBtn.onclick = async () => {
 };
 document.fonts?.load(`700 40px "Noto Sans JP"`, "小さな島").then(() => { if (script) show(time); }).catch(() => {});
 
-text.value = SAMPLE;
+const episodes = import.meta.glob("/episodes/*.yaml", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+const picker = $<HTMLSelectElement>("episode");
+for (const path of Object.keys(episodes).sort()) { const o = document.createElement("option"); o.value = path; o.textContent = episodes[path].match(/^title:\s*(.+)$/m)?.[1] ?? path; picker.append(o); }
+picker.onchange = () => { text.value = episodes[picker.value]; setPlaying(false); if (renderer && apply()) show(0); };
+text.value = episodes[picker.value] ?? "";
 try { renderer = new Renderer(gl); apply(); }
 catch (e) { say((e as Error).message, true); }
 let gallery: Gallery | null = null;

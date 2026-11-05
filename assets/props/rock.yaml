@@ -5,4 +5,6 @@ tags: [自然物, 海岸]
 states:
   - name: 通常
     parts:
-      - {shape: cone, at: [0, 0, 0], radius: 1, height: 1.1, sides: 9, color: "#808085"}
+      - {shape: sphere, at: [0, 0.42, 0], scale: [1.05, 0.72, 0.9], detail: 2, jitter: 0.2, seed: 3, color: "#74757a"}
+      - {shape: sphere, at: [0.75, 0.2, 0.35], scale: [0.5, 0.36, 0.45], detail: 2, jitter: 0.22, seed: 8, color: "#66676d"}
+      - {shape: sphere, at: [-0.15, 0.82, -0.05], scale: [0.5, 0.26, 0.42], detail: 1, jitter: 0.18, seed: 5, color: "#576b4a"}

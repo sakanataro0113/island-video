@@ -1,0 +1,12 @@
+id: genta
+kind: 人物
+name: ゲンタ
+tags: [はま村, 網田家, 漁師]
+born: -22
+clothes: "#2f7d70"
+hair: "#2a1d14"
+skin: "#d8a57c"
+hair_style: short
+states:
+  - {name: 青年, from_age: 0, height: 1.0}
+  - {name: 老年, from_age: 40, height: 0.9, stoop: 0.35, hair: "#a8a59d", clothes: "#3f6d66", skin: "#c49a78"}

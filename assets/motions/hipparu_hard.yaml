@@ -1,0 +1,6 @@
+id: hipparu_hard
+kind: 動作
+name: 激しく引っ張り合う
+tags: [争い]
+description: 体を揺らして全力で引き合う
+needs_target: true

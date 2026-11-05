@@ -1,0 +1,26 @@
+id: rack
+kind: 小物
+name: 干し棚
+tags: [漁具, 村]
+states:
+  - name: 空
+    parts:
+      - {shape: cylinder, at: [-1, 0, -0.3], radius: 0.09, top: 0.07, height: 1.5, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [-1, 0, 0.3], radius: 0.09, top: 0.07, height: 1.5, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [1, 0, -0.3], radius: 0.09, top: 0.07, height: 1.5, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [1, 0, 0.3], radius: 0.09, top: 0.07, height: 1.5, sides: 7, color: "#5c4029"}
+      - {shape: box, at: [0, 1.42, -0.3], size: [2.3, 0.1, 0.1], color: "#7a5433"}
+      - {shape: box, at: [0, 1.42, 0.3], size: [2.3, 0.1, 0.1], color: "#7a5433"}
+  - name: 魚あり
+    parts:
+      - {shape: cylinder, at: [-1, 0, -0.3], radius: 0.09, top: 0.07, height: 1.5, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [-1, 0, 0.3], radius: 0.09, top: 0.07, height: 1.5, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [1, 0, -0.3], radius: 0.09, top: 0.07, height: 1.5, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [1, 0, 0.3], radius: 0.09, top: 0.07, height: 1.5, sides: 7, color: "#5c4029"}
+      - {shape: box, at: [0, 1.42, -0.3], size: [2.3, 0.1, 0.1], color: "#7a5433"}
+      - {shape: box, at: [0, 1.42, 0.3], size: [2.3, 0.1, 0.1], color: "#7a5433"}
+      - {shape: sphere, at: [-0.7, 1.08, 0.3], scale: [0.08, 0.28, 0.05], detail: 1, jitter: 0.05, seed: 3, color: "#a9b7b8"}
+      - {shape: sphere, at: [-0.35, 1.08, 0.3], scale: [0.08, 0.28, 0.05], detail: 1, jitter: 0.05, seed: 3, color: "#a9b7b8"}
+      - {shape: sphere, at: [0, 1.08, 0.3], scale: [0.08, 0.28, 0.05], detail: 1, jitter: 0.05, seed: 3, color: "#a9b7b8"}
+      - {shape: sphere, at: [0.35, 1.08, 0.3], scale: [0.08, 0.28, 0.05], detail: 1, jitter: 0.05, seed: 3, color: "#a9b7b8"}
+      - {shape: sphere, at: [0.7, 1.08, 0.3], scale: [0.08, 0.28, 0.05], detail: 1, jitter: 0.05, seed: 3, color: "#a9b7b8"}

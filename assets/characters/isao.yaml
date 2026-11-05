@@ -1,0 +1,12 @@
+id: isao
+kind: 人物
+name: イサオ
+tags: [はま村, 網田家, 村長]
+born: -35
+clothes: "#d9c58a"
+hair: "#8f8b82"
+skin: "#d3a67f"
+hair_style: bald
+states:
+  - {name: 壮年, from_age: 0, height: 0.96, stoop: 0.1}
+  - {name: 老年, from_age: 55, height: 0.86, stoop: 0.4, skin: "#c79c79"}

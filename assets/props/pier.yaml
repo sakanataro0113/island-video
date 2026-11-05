@@ -5,17 +5,23 @@ tags: [木造, 漁具]
 states:
   - name: 通常
     parts:
-      - {shape: box, at: [0, 0.42, 0], size: [1.5, 0.1, 0.62], color: "#855c38"}
-      - {shape: box, at: [0, 0.42, 0.72], size: [1.5, 0.1, 0.62], color: "#785133"}
-      - {shape: box, at: [0, 0.42, 1.44], size: [1.5, 0.1, 0.62], color: "#855c38"}
-      - {shape: box, at: [0, 0.42, 2.16], size: [1.5, 0.1, 0.62], color: "#785133"}
-      - {shape: box, at: [0, 0.42, 2.88], size: [1.5, 0.1, 0.62], color: "#855c38"}
-      - {shape: box, at: [0, 0.42, 3.6], size: [1.5, 0.1, 0.62], color: "#785133"}
-      - {shape: box, at: [0, 0.42, 4.32], size: [1.5, 0.1, 0.62], color: "#855c38"}
-      - {shape: box, at: [0, 0.42, 5.04], size: [1.5, 0.1, 0.62], color: "#785133"}
-      - {shape: box, at: [-0.65, 0, 0], size: [0.14, 1, 0.14], color: "#5c4029"}
-      - {shape: box, at: [0.65, 0, 0], size: [0.14, 1, 0.14], color: "#5c4029"}
-      - {shape: box, at: [-0.65, 0, 2.6], size: [0.14, 1, 0.14], color: "#5c4029"}
-      - {shape: box, at: [0.65, 0, 2.6], size: [0.14, 1, 0.14], color: "#5c4029"}
-      - {shape: box, at: [-0.65, 0, 5], size: [0.14, 1, 0.14], color: "#5c4029"}
-      - {shape: box, at: [0.65, 0, 5], size: [0.14, 1, 0.14], color: "#5c4029"}
+      - {shape: box, at: [0.018, 0.42, 0.00], rot: [0, -1.02, -0.05], size: [1.49, 0.08, 0.45], color: "#8a6039"}
+      - {shape: box, at: [0.033, 0.42, 0.50], rot: [0, 0.66, 0.66], size: [1.51, 0.08, 0.45], color: "#8a6039"}
+      - {shape: box, at: [-0.011, 0.42, 1.00], rot: [0, 0.82, 0.62], size: [1.52, 0.08, 0.45], color: "#8a6039"}
+      - {shape: box, at: [0.034, 0.42, 1.50], rot: [0, 0.77, 0.72], size: [1.48, 0.08, 0.45], color: "#7d5534"}
+      - {shape: box, at: [-0.015, 0.42, 2.00], rot: [0, 0.58, 0.28], size: [1.48, 0.08, 0.45], color: "#7d5534"}
+      - {shape: box, at: [0.008, 0.42, 2.50], rot: [0, 0.01, 0.38], size: [1.46, 0.08, 0.45], color: "#7d5534"}
+      - {shape: box, at: [-0.018, 0.42, 3.00], rot: [0, 0.79, 0.98], size: [1.48, 0.08, 0.45], color: "#8a6039"}
+      - {shape: box, at: [-0.039, 0.42, 3.50], rot: [0, 0.51, -0.46], size: [1.57, 0.08, 0.45], color: "#92683f"}
+      - {shape: box, at: [0.001, 0.42, 4.00], rot: [0, 0.25, -0.19], size: [1.57, 0.08, 0.45], color: "#7d5534"}
+      - {shape: box, at: [-0.021, 0.42, 4.50], rot: [0, 0.74, -0.53], size: [1.51, 0.08, 0.45], color: "#7d5534"}
+      - {shape: box, at: [0.010, 0.42, 5.00], rot: [0, 0.09, -0.48], size: [1.46, 0.08, 0.45], color: "#8a6039"}
+      - {shape: cylinder, at: [-0.66, -0.55, 0], radius: 0.085, top: 0.07, height: 1.25, sides: 8, color: "#4a3423"}
+      - {shape: cylinder, at: [0.66, -0.55, 0], radius: 0.085, top: 0.07, height: 1.25, sides: 8, color: "#4a3423"}
+      - {shape: cylinder, at: [-0.66, -0.55, 2.5], radius: 0.085, top: 0.07, height: 1.25, sides: 8, color: "#4a3423"}
+      - {shape: cylinder, at: [0.66, -0.55, 2.5], radius: 0.085, top: 0.07, height: 1.25, sides: 8, color: "#4a3423"}
+      - {shape: cylinder, at: [-0.66, -0.55, 5], radius: 0.085, top: 0.07, height: 1.25, sides: 8, color: "#4a3423"}
+      - {shape: cylinder, at: [0.66, -0.55, 5], radius: 0.085, top: 0.07, height: 1.25, sides: 8, color: "#4a3423"}
+      - {shape: box, at: [-0.5, 0.34, 2.5], size: [0.12, 0.09, 5.4], color: "#5c4029"}
+      - {shape: box, at: [0.5, 0.34, 2.5], size: [0.12, 0.09, 5.4], color: "#5c4029"}
+      - {shape: cylinder, at: [0.42, 0.46, 4.7], radius: 0.16, top: 0.13, height: 0.09, sides: 10, color: "#b49b6b"}

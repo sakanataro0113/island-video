@@ -1,0 +1,8 @@
+id: tug_rope
+kind: 小物
+name: 綱
+tags: [漁具]
+states:
+  - name: 通常
+    parts:
+      - {shape: cylinder, at: [-7.5, 0, 0], rot: [0, 0, -90], radius: 0.035, top: 0.035, height: 15, sides: 8, color: "#b49b6b"}

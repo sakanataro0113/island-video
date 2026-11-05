@@ -1,0 +1,6 @@
+id: suwarikomu
+kind: 動作
+name: 座り込む
+tags: [感情]
+description: その場に力なく座る
+needs_target: false

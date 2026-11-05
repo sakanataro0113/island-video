@@ -1,0 +1,8 @@
+id: boundary
+kind: 小物
+name: 境の線
+tags: [はま村, もり村, 分断]
+states:
+  - name: 通常
+    parts:
+      - {shape: box, at: [0, 0, 0], size: [0.16, 0.025, 16], color: "#4f3a24"}

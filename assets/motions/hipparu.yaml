@@ -1,0 +1,6 @@
+id: hipparu
+kind: 動作
+name: 引っ張り合う
+tags: [争い]
+description: 両手で同じ物を引き合う
+needs_target: true

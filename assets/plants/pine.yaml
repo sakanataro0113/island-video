@@ -5,7 +5,9 @@ tags: [森, 高木]
 states:
   - name: 通常
     parts:
-      - {shape: box, at: [0, 0.35, 0], size: [0.25, 0.7, 0.25], color: "#5c4029"}
-      - {shape: cone, at: [0, 0.55, 0], radius: 1, height: 1.8, sides: 10, color: "#337847"}
-      - {shape: cone, at: [0, 1.27, 0], radius: 0.8, height: 1.44, sides: 10, color: "#458c52"}
-      - {shape: cone, at: [0, 1.99, 0], radius: 0.55, height: 1.08, sides: 10, color: "#549e5e"}
+      - {shape: cylinder, at: [0, 0, 0], radius: 0.17, top: 0.06, height: 2.5, sides: 9, color: "#4d3524"}
+      - {shape: cone, at: [0, 0.5, 0], radius: 1.12, height: 0.95, sides: 13, jitter: 0.14, seed: 2, color: "#2f6d41"}
+      - {shape: cone, at: [0, 0.95, 0], radius: 0.98, height: 0.9, sides: 13, jitter: 0.14, seed: 3, color: "#357648"}
+      - {shape: cone, at: [0, 1.35, 0], radius: 0.82, height: 0.86, sides: 13, jitter: 0.14, seed: 4, color: "#3d8250"}
+      - {shape: cone, at: [0, 1.72, 0], radius: 0.66, height: 0.8, sides: 13, jitter: 0.14, seed: 5, color: "#478e58"}
+      - {shape: cone, at: [0, 2.05, 0], radius: 0.46, height: 0.72, sides: 13, jitter: 0.14, seed: 6, color: "#569b61"}

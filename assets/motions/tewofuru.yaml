@@ -1,0 +1,6 @@
+id: tewofuru
+kind: 動作
+name: 手を振る
+tags: [感情]
+description: 片手を上げて振る
+needs_target: false

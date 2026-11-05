@@ -1,0 +1,6 @@
+id: miageru
+kind: 動作
+name: 見上げる
+tags: [反応]
+description: 顔を上に向ける
+needs_target: false

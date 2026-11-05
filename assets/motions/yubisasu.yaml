@@ -1,0 +1,6 @@
+id: yubisasu
+kind: 動作
+name: 指さす
+tags: [反応]
+description: 腕を斜め上へ伸ばす
+needs_target: false

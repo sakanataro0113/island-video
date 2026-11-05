@@ -2,12 +2,11 @@ id: ruha
 kind: 人物
 name: ルハ
 tags: [トマリ村, クロダ家, 漁師]
-born: 18
-clothes: "#6a3f8f"
+born: -20
+clothes: "#5c3b86"
 hair: "#17151c"
-skin: "#d9a67c"
+skin: "#e4b892"
 hair_style: long
 states:
-  - {name: 若者, from_age: 0, height: 0.92}
-  - {name: 壮年, from_age: 30, height: 0.95}
-  - {name: 老人, from_age: 55, height: 0.9, hair: "#9a9791"}
+  - {name: 青年, from_age: 0, height: 0.96}
+  - {name: 老年, from_age: 38, height: 0.88, stoop: 0.3, hair: "#b8b6ae", clothes: "#5b4b70", skin: "#cda583"}

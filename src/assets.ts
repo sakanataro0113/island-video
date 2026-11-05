@@ -5,17 +5,21 @@ import type { Vec3 } from "./math";
 export const KINDS = ["人物", "建物", "小物", "植物", "場所", "動作"] as const;
 export type Kind = (typeof KINDS)[number];
 
-export type Part =
-  | { shape: "box"; at: Vec3; size: Vec3; color: Vec3 }
-  | { shape: "cone"; at: Vec3; radius: number; height: number; sides: number; color: Vec3 };
+type PartBase = { at: Vec3; color: Vec3; rot?: Vec3 };
+export type Part = PartBase & (
+  | { shape: "box"; size: Vec3 }
+  | { shape: "cone"; radius: number; height: number; sides: number; jitter: number; seed: number }
+  | { shape: "cylinder"; radius: number; top: number; height: number; sides: number }
+  | { shape: "sphere"; scale: Vec3; detail: number; jitter: number; seed: number }
+  | { shape: "loft"; sections: [number, number, number, number][] });
 type Base = { id: string; kind: Kind; name: string; tags: string[]; source: string; raw: string; states: string[] };
-export type Look = { clothes: Vec3; hair: Vec3; skin: Vec3; height: number; hairStyle: "short" | "long" | "bald" };
+export type Look = { clothes: Vec3; hair: Vec3; skin: Vec3; height: number; hairStyle: "short" | "long" | "bald"; stoop: number; skirt: boolean };
 export type CharacterAsset = Base & { kind: "人物"; born: number; died?: number; looks: { name: string; fromAge: number; look: Look }[] };
 export type ModelAsset = Base & { kind: "建物" | "小物" | "植物"; parts: Record<string, Part[]> };
 export type PlaceAsset = Base & {
   kind: "場所";
   terrain: { centerZ: number; radius: number };
-  items: { asset: string; at: Vec3; scale: number; rot: number; state?: string }[];
+  items: { asset: string; at: Vec3; scale: number; rot: number; ground: boolean; state?: string }[];
   scatter: { asset: string; count: number; seed: number; ring: [number, number]; scale: [number, number] }[];
   exclude: { x: [number, number]; z: [number, number] }[];
 };
@@ -31,9 +35,14 @@ const vec = (v: unknown, where: string): Vec3 => { if (!Array.isArray(v) || v.le
 const pair = (v: unknown, where: string): [number, number] => { if (!Array.isArray(v) || v.length !== 2) throw new Error(`${where} は [最小, 最大] の形で書いてください。`); return [num(v[0], where), num(v[1], where)]; };
 
 function parsePart(p: any, where: string): Part {
-  if (p?.shape === "box") return { shape: "box", at: vec(p.at, where + " at"), size: vec(p.size, where + " size"), color: hex(p.color, where) };
-  if (p?.shape === "cone") return { shape: "cone", at: vec(p.at, where + " at"), radius: num(p.radius, where + " radius"), height: num(p.height, where + " height"), sides: Math.max(3, Math.round(num(p.sides ?? 8, where + " sides"))), color: hex(p.color, where) };
-  throw new Error(`${where} の shape は box か cone にしてください。`);
+  const base: PartBase = { at: vec(p?.at, where + " at"), color: hex(p?.color, where), rot: p?.rot === undefined ? undefined : vec(p.rot, where + " rot") };
+  const sides = () => Math.max(3, Math.round(num(p.sides ?? 8, where + " sides")));
+  if (p.shape === "box") return { ...base, shape: "box", size: vec(p.size, where + " size") };
+  if (p.shape === "cone") return { ...base, shape: "cone", radius: num(p.radius, where + " radius"), height: num(p.height, where + " height"), sides: sides(), jitter: num(p.jitter ?? 0, where + " jitter"), seed: num(p.seed ?? 1, where + " seed") };
+  if (p.shape === "cylinder") return { ...base, shape: "cylinder", radius: num(p.radius, where + " radius"), top: num(p.top ?? p.radius, where + " top"), height: num(p.height, where + " height"), sides: sides() };
+  if (p.shape === "sphere") return { ...base, shape: "sphere", scale: vec(p.scale ?? [1, 1, 1], where + " scale"), detail: Math.min(3, Math.max(0, Math.round(num(p.detail ?? 1, where + " detail")))), jitter: num(p.jitter ?? 0, where + " jitter"), seed: num(p.seed ?? 1, where + " seed") };
+  if (p.shape === "loft" && Array.isArray(p.sections) && p.sections.length >= 2) return { ...base, shape: "loft", sections: p.sections.map((q: unknown) => { if (!Array.isArray(q) || q.length !== 4) throw new Error(`${where} の sections は [位置, 半幅, 下, 上] の形で書いてください。`); return q.map(n => num(n, where)) as [number, number, number, number]; }) };
+  throw new Error(`${where} の shape は box、cone、cylinder、sphere、loft から選んでください。`);
 }
 
 export function parseAsset(raw: string, source: string): Asset {
@@ -48,13 +57,13 @@ export function parseAsset(raw: string, source: string): Asset {
     if (!Array.isArray(d.states) || !d.states.length) throw new Error("states がありません。");
     const looks = d.states.map((s: any) => ({
       name: String(s.name), fromAge: num(s.from_age, "from_age"),
-      look: { clothes: hex(s.clothes ?? d.clothes, "clothes"), hair: hex(s.hair ?? d.hair, "hair"), skin: hex(s.skin ?? d.skin, "skin"), height: num(s.height ?? 1, "height"), hairStyle: (["short", "long", "bald"].includes(s.hair_style ?? d.hair_style) ? (s.hair_style ?? d.hair_style) : "short") as Look["hairStyle"] },
+      look: { clothes: hex(s.clothes ?? d.clothes, "clothes"), hair: hex(s.hair ?? d.hair, "hair"), skin: hex(s.skin ?? d.skin, "skin"), height: num(s.height ?? 1, "height"), hairStyle: (["short", "long", "bald"].includes(s.hair_style ?? d.hair_style) ? (s.hair_style ?? d.hair_style) : "short") as Look["hairStyle"], stoop: num(s.stoop ?? 0, "stoop"), skirt: !!(s.skirt ?? d.skirt) },
     }));
     if (d.died !== undefined) num(d.died, "died");
     return { ...base, kind: "人物", born: num(d.born, "born"), died: d.died, looks, states: looks.map((l: { name: string }) => l.name) };
   }
   if (d.kind === "場所") {
-    const items = (d.items ?? []).map((i: any) => ({ asset: String(i.asset), at: vec(i.at, "items.at"), scale: num(i.scale ?? 1, "items.scale"), rot: num(i.rot ?? 0, "items.rot"), state: i.state === undefined ? undefined : String(i.state) }));
+    const items = (d.items ?? []).map((i: any) => ({ asset: String(i.asset), at: vec(i.at, "items.at"), scale: num(i.scale ?? 1, "items.scale"), rot: num(i.rot ?? 0, "items.rot"), ground: !!i.ground, state: i.state === undefined ? undefined : String(i.state) }));
     const scatter = (d.scatter ?? []).map((s: any) => ({ asset: String(s.asset), count: num(s.count, "scatter.count"), seed: num(s.seed, "scatter.seed"), ring: pair(s.ring, "scatter.ring"), scale: pair(s.scale ?? [1, 1], "scatter.scale") }));
     const exclude = (d.exclude ?? []).map((e: any) => ({ x: pair(e.x, "exclude.x"), z: pair(e.z, "exclude.z") }));
     return { ...base, kind: "場所", terrain: { centerZ: num(d.terrain?.center_z, "terrain.center_z"), radius: num(d.terrain?.radius, "terrain.radius") }, items, scatter, exclude, states: [...TIMES] };
