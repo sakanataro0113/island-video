@@ -8,7 +8,11 @@
 <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-<main class="app">
+<nav class="tabs" aria-label="画面の切り替え">
+  <a id="tab-video" href="#video">映像</a>
+  <a id="tab-assets" href="#assets">素材一覧</a>
+</nav>
+<main class="app" id="view-video">
   <section class="stage">
     <div class="frame" id="frame">
       <canvas id="gl" width="540" height="960" aria-label="3D映像のプレビュー"></canvas>
@@ -40,6 +44,25 @@
     </details>
   </section>
 </main>
+<main class="assets" id="view-assets" hidden>
+  <div class="filters">
+    <input id="asset-search" type="search" placeholder="名前、タグ、状態で検索" aria-label="素材を検索">
+    <button class="chip" id="asset-used" type="button" aria-pressed="false">台本で使用中</button>
+    <button class="plain" id="asset-clear" type="button">すべて解除</button>
+    <output id="asset-count"></output>
+    <div class="group"><span>種類</span><div id="asset-kinds"></div></div>
+    <div class="group"><span>タグ</span><div id="asset-tags"></div></div>
+  </div>
+  <pre class="asset-errors" id="asset-errors" hidden></pre>
+  <div id="asset-grid"></div>
+</main>
+<dialog id="asset-dialog" aria-labelledby="asset-title">
+  <header><div><h2 id="asset-title"></h2><p id="asset-info"></p></div><button id="asset-close" class="plain" type="button">閉じる</button></header>
+  <div class="dialog-body">
+    <div class="viewer"><canvas id="asset-view" width="640" height="640" aria-label="素材の3Dプレビュー。ドラッグで回転できます"></canvas><p>ドラッグで回転</p><div id="asset-states" class="chips"></div></div>
+    <div class="source"><h3>素材ファイル</h3><pre id="asset-raw"></pre></div>
+  </div>
+</dialog>
 <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

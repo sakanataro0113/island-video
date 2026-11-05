@@ -1,0 +1,21 @@
+id: pier
+kind: 小物
+name: 桟橋
+tags: [木造, 漁具]
+states:
+  - name: 通常
+    parts:
+      - {shape: box, at: [0, 0.42, 0], size: [1.5, 0.1, 0.62], color: "#855c38"}
+      - {shape: box, at: [0, 0.42, 0.72], size: [1.5, 0.1, 0.62], color: "#785133"}
+      - {shape: box, at: [0, 0.42, 1.44], size: [1.5, 0.1, 0.62], color: "#855c38"}
+      - {shape: box, at: [0, 0.42, 2.16], size: [1.5, 0.1, 0.62], color: "#785133"}
+      - {shape: box, at: [0, 0.42, 2.88], size: [1.5, 0.1, 0.62], color: "#855c38"}
+      - {shape: box, at: [0, 0.42, 3.6], size: [1.5, 0.1, 0.62], color: "#785133"}
+      - {shape: box, at: [0, 0.42, 4.32], size: [1.5, 0.1, 0.62], color: "#855c38"}
+      - {shape: box, at: [0, 0.42, 5.04], size: [1.5, 0.1, 0.62], color: "#785133"}
+      - {shape: box, at: [-0.65, 0, 0], size: [0.14, 1, 0.14], color: "#5c4029"}
+      - {shape: box, at: [0.65, 0, 0], size: [0.14, 1, 0.14], color: "#5c4029"}
+      - {shape: box, at: [-0.65, 0, 2.6], size: [0.14, 1, 0.14], color: "#5c4029"}
+      - {shape: box, at: [0.65, 0, 2.6], size: [0.14, 1, 0.14], color: "#5c4029"}
+      - {shape: box, at: [-0.65, 0, 5], size: [0.14, 1, 0.14], color: "#5c4029"}
+      - {shape: box, at: [0.65, 0, 5], size: [0.14, 1, 0.14], color: "#5c4029"}

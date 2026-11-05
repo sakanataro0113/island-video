@@ -1,0 +1,6 @@
+id: naguru
+kind: 動作
+name: 殴る
+tags: [争い]
+description: 腕を振り上げて打つ
+needs_target: true

@@ -1,4 +1,5 @@
-import { hashName, rng, type Vec3 } from "./math";
+import type { Asset, ModelAsset, Part, PlaceAsset } from "./assets";
+import { rng, type Vec3 } from "./math";
 
 export class MeshBuilder {
   data: number[] = [];
@@ -22,48 +23,59 @@ export class MeshBuilder {
   floats() { return new Float32Array(this.data); }
 }
 
-const CENTER_Z = -13, RADIUS = 16;
-/** 島の地形の高さ。中心へ行くほど高く、岸で海へ沈む。 */
-export function terrainHeight(x: number, z: number): number {
-  const d = Math.hypot(x, z - CENTER_Z), a = Math.atan2(z - CENTER_Z, x);
-  const edge = RADIUS + Math.sin(a*3+1)*1.0 + Math.sin(a*7)*0.5;
+export type Terrain = PlaceAsset["terrain"];
+/** 地形の高さ。中心へ行くほど高く、岸で海へ沈む。 */
+export function terrainHeight(terrain: Terrain, x: number, z: number): number {
+  const dz = z-terrain.centerZ, d = Math.hypot(x, dz), a = Math.atan2(dz, x);
+  const edge = terrain.radius + Math.sin(a*3+1)*1.0 + Math.sin(a*7)*0.5;
   if (d > edge) return 0.25 - (d - edge)*0.5;
   const inland = Math.max(0, edge - d - 5);
   const hill = 3.2*(1-Math.exp(-inland*inland*.018));
   return 0.25 + hill + (inland > 0 ? (Math.sin(x*.9+1)+Math.sin(z*.7))*.1*Math.min(1,inland) : 0);
 }
 
-const SAND: Vec3=[.86,.76,.53], GRASS: Vec3=[.42,.62,.33], DARK: Vec3=[.31,.5,.29], ROCK: Vec3=[.5,.5,.52], WOOD: Vec3=[.47,.32,.2], BARK: Vec3=[.36,.25,.17], LEAF: Vec3=[.2,.47,.28], ROOF: Vec3=[.62,.33,.22], WALL: Vec3=[.82,.72,.56];
+function addParts(m: MeshBuilder, parts: Part[], at: Vec3 = [0,0,0], scale = 1, rotDeg = 0) {
+  const c = Math.cos(rotDeg*Math.PI/180), s = Math.sin(rotDeg*Math.PI/180);
+  const tr = (p: Vec3): Vec3 => [at[0]+(p[0]*c+p[2]*s)*scale, at[1]+p[1]*scale, at[2]+(-p[0]*s+p[2]*c)*scale];
+  for (const part of parts) {
+    const local = new MeshBuilder();
+    if (part.shape === "box") local.box(part.at[0],part.at[1],part.at[2],part.size[0],part.size[1],part.size[2],part.color);
+    else local.cone(part.at[0],part.at[1],part.at[2],part.radius,part.height,part.sides,part.color);
+    for (let i = 0; i < local.data.length; i += 18) {
+      const v = (o: number): Vec3 => [local.data[i+o],local.data[i+o+1],local.data[i+o+2]];
+      m.tri(tr(v(0)),tr(v(6)),tr(v(12)),part.color);
+    }
+  }
+}
+export function buildModel(asset: ModelAsset, state: string): Float32Array { const m = new MeshBuilder(); addParts(m, asset.parts[state] ?? Object.values(asset.parts)[0]); return m.floats(); }
 
-export function buildIsland(): Float32Array {
-  const m = new MeshBuilder(), r = rng(7), cell = 1, jit = rng(11), jitter = new Map<string, [number, number]>();
+const SAND: Vec3=[.86,.76,.53], GRASS: Vec3=[.42,.62,.33], DARK: Vec3=[.31,.5,.29];
+export function buildPlace(place: PlaceAsset, byId: Map<string, Asset>): Float32Array {
+  const m = new MeshBuilder(), r = rng(7), cell = 1, jit = rng(11), jitter = new Map<string, [number, number]>(), { centerZ, radius } = place.terrain;
   const pt = (i: number, j: number): Vec3 => {
     const key = `${i},${j}`;
     if (!jitter.has(key)) jitter.set(key, [(jit()-.5)*cell*.55, (jit()-.5)*cell*.55]);
-    const [dx, dz] = jitter.get(key)!, x = i*cell+dx, z = CENTER_Z+j*cell+dz;
-    return [x, terrainHeight(x,z), z];
+    const [dx, dz] = jitter.get(key)!, x = i*cell+dx, z = centerZ+j*cell+dz;
+    return [x, terrainHeight(place.terrain,x,z), z];
   };
-  const n = Math.ceil((RADIUS+4)/cell);
+  const n = Math.ceil((radius+4)/cell);
   for (let i = -n; i < n; i++) for (let j = -n; j < n; j++) {
     const a=pt(i,j), b=pt(i+1,j), c=pt(i+1,j+1), d=pt(i,j+1), y=(a[1]+b[1]+c[1]+d[1])/4;
     if (y < -.6) continue;
     const v = .93+r()*.14, base = y < .42 ? SAND : y > 2.2 ? DARK : GRASS, col: Vec3 = [base[0]*v, base[1]*v, base[2]*v];
     m.tri(a,c,d,col); m.tri(a,b,c,[col[0]*.97,col[1]*.97,col[2]*.97]);
   }
-  // 大磯の漁場: 桟橋、舟、岩、小屋、木
-  for (let k = 0; k < 8; k++) m.box(4.6, .42, 2.2+k*.72, 1.5, .1, .62, k%2 ? WOOD : [.52,.36,.23]);
-  for (const z of [2.2, 4.8, 7.2]) for (const x of [3.95, 5.25]) m.box(x, 0, z, .14, 1, .14, BARK);
-  m.box(-5, .32, 4.2, 2.6, .34, .95, WOOD); m.box(-5, .55, 4.2, 2.1, .1, .62, [.25,.17,.11]);
-  m.cone(-3.7, .15, 4.2, .47, .5, 8, WOOD); m.cone(-6.3, .15, 4.2, .47, .5, 8, WOOD);
-  for (const [x,z,s] of [[6.8,1.6,.9],[7.5,.6,.6],[-7,1.5,.8],[-2.5,4,.45]] as const) m.cone(x,.1,z,s,s*1.1,9,ROCK);
-  m.box(-3.6,1.15,-5.5,3.2,1.8,2.5,WALL); m.cone(-3.6,2.05,-5.5,2.65,1.5,4,ROOF);
-  m.box(3.9,1.05,-7,2.7,1.6,2.2,WALL); m.cone(3.9,1.85,-7,2.3,1.3,4,ROOF);
-  for (let k = 0; k < 42; k++) {
-    const a = r()*Math.PI*2, d = 4+r()*9, x = Math.cos(a)*d, z = CENTER_Z+Math.sin(a)*d;
-    if (z > -6 && Math.abs(x) < 7) continue;
-    if (z > -3) continue;
-    const y = terrainHeight(x,z), h = 1.3+r()*1.2;
-    m.box(x,y+.35,z,.25,.7,.25,BARK); m.cone(x,y+.55,z,1,h,10,LEAF); m.cone(x,y+.55+h*.4,z,.8,h*.8,10,[.27,.55,.32]); m.cone(x,y+.55+h*.8,z,.55,h*.6,10,[.33,.62,.37]);
+  for (const item of place.items) {
+    const a = byId.get(item.asset) as ModelAsset;
+    addParts(m, a.parts[item.state ?? a.states[0]], item.at, item.scale, item.rot);
+  }
+  for (const s of place.scatter) {
+    const a = byId.get(s.asset) as ModelAsset, q = rng(s.seed);
+    for (let k = 0; k < s.count; k++) {
+      const angle = q()*Math.PI*2, d = s.ring[0]+q()*(s.ring[1]-s.ring[0]), x = Math.cos(angle)*d, z = centerZ+Math.sin(angle)*d, sc = s.scale[0]+q()*(s.scale[1]-s.scale[0]);
+      if (place.exclude.some(e => x>=e.x[0] && x<=e.x[1] && z>=e.z[0] && z<=e.z[1])) continue;
+      addParts(m, a.parts[a.states[0]], [x, terrainHeight(place.terrain,x,z), z], sc, q()*360);
+    }
   }
   return m.floats();
 }
@@ -94,7 +106,3 @@ export function buildBlob(): Float32Array {
   for (let i = 0; i < n; i++) { const a=i/n*Math.PI*2,b=(i+1)/n*Math.PI*2; m.tri([0,0,0],[Math.sin(a),0,Math.cos(a)],[Math.sin(b),0,Math.cos(b)],[0,0,0]); }
   return m.floats();
 }
-
-const CLOTH: Vec3[] = [[.72,.25,.2],[.2,.42,.68],[.83,.6,.18],[.42,.3,.6],[.2,.55,.48],[.68,.42,.3]];
-const HAIR: Vec3[] = [[.14,.1,.08],[.32,.2,.11],[.5,.47,.42],[.1,.1,.13]];
-export function looksFor(name: string) { const h = hashName(name); return { cloth: CLOTH[h % CLOTH.length], hair: HAIR[(h>>>8) % HAIR.length] }; }

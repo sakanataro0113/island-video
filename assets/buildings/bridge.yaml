@@ -1,0 +1,21 @@
+id: bridge
+kind: 建物
+name: 橋
+tags: [木造, 交通]
+states:
+  - name: 健在
+    parts:
+      - {shape: box, at: [0, 1.0, 0], size: [8, 0.16, 1.6], color: "#7a5433"}
+      - {shape: box, at: [-3, 0.5, -0.65], size: [0.2, 1, 0.2], color: "#5c4029"}
+      - {shape: box, at: [-3, 0.5, 0.65], size: [0.2, 1, 0.2], color: "#5c4029"}
+      - {shape: box, at: [3, 0.5, -0.65], size: [0.2, 1, 0.2], color: "#5c4029"}
+      - {shape: box, at: [3, 0.5, 0.65], size: [0.2, 1, 0.2], color: "#5c4029"}
+      - {shape: box, at: [0, 1.5, -0.75], size: [8, 0.1, 0.1], color: "#5c4029"}
+      - {shape: box, at: [0, 1.5, 0.75], size: [8, 0.1, 0.1], color: "#5c4029"}
+  - name: 廃墟
+    parts:
+      - {shape: box, at: [-2.8, 1.0, 0], size: [2.4, 0.16, 1.6], color: "#62503c"}
+      - {shape: box, at: [-3, 0.5, -0.65], size: [0.2, 1, 0.2], color: "#4a3a2a"}
+      - {shape: box, at: [-3, 0.5, 0.65], size: [0.2, 1, 0.2], color: "#4a3a2a"}
+      - {shape: box, at: [3, 0.28, 0.65], size: [0.2, 0.56, 0.2], color: "#4a3a2a"}
+      - {shape: box, at: [2.4, 0.08, -0.2], size: [2.2, 0.16, 1.1], color: "#62503c"}

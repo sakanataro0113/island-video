@@ -1,0 +1,9 @@
+id: bush
+kind: 植物
+name: 低木
+tags: [森, 低木]
+states:
+  - name: 通常
+    parts:
+      - {shape: cone, at: [0, 0, 0], radius: 0.65, height: 0.75, sides: 8, color: "#3f7c43"}
+      - {shape: cone, at: [0.35, 0, 0.1], radius: 0.42, height: 0.55, sides: 8, color: "#4e8e4c"}

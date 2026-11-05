@@ -6,5 +6,17 @@
     npm run dev     # 開発
     npm run build   # dist/ に公開用ファイルを生成
 
-Cloudflare Pages の設定: ビルドコマンド `npm run build`、出力先 `dist`、本番ブランチ `main`。
-`main` へ push すると自動でデプロイされます。
+`main` へ push すると Cloudflare Workers に自動でデプロイされます。
+
+## 素材
+
+素材は `assets/` に種類ごとのYAMLで置きます。ファイルを追加すると、素材一覧に自動で出ます。
+
+| フォルダ | 種類 | 主な項目 |
+|---|---|---|
+| characters | 人物 | born、died、clothes、hair、skin、hair_style、states |
+| buildings / props / plants | 建物、小物、植物 | states ごとの parts(box または cone) |
+| places | 場所 | terrain、items、scatter、exclude |
+| motions | 動作 | 動きの計算はコード側の `render.ts` にあります |
+
+台本に `year` を書くと、その年の年齢で人物の見た目を選び、生まれる前や死亡後の登場はエラーにします。

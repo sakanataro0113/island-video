@@ -1,4 +1,6 @@
-import { CAMERAS, PLACES, SAMPLE, TIMES, VERBS, parseScript, type Script } from "./script";
+import { CAMERAS, SAMPLE, TIMES, VERBS, parseScript, type Script } from "./script";
+import { catalog, ofKind } from "./assets";
+import { Gallery } from "./gallery";
 import { Renderer, drawSubtitle } from "./render";
 import { exportMp4, saveFile, type ExportResult } from "./export";
 
@@ -6,7 +8,7 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 const gl = $<HTMLCanvasElement>("gl"), overlay = $<HTMLCanvasElement>("overlay"), text = $<HTMLTextAreaElement>("text");
 const seek = $<HTMLInputElement>("seek"), clock = $<HTMLOutputElement>("clock"), play = $<HTMLButtonElement>("play"), message = $<HTMLParagraphElement>("message");
 
-$("vocab").innerHTML = ([["場所", PLACES], ["時間帯", TIMES], ["カメラ", CAMERAS], ["動作", VERBS]] as const).map(([k, v]) => `<dt>${k}</dt><dd>${v.join("、")}</dd>`).join("");
+$("vocab").innerHTML = ([["人物", ofKind("人物").map(c => c.name)], ["場所", ofKind("場所").map(p => p.name)], ["時間帯", TIMES], ["カメラ", CAMERAS], ["動作", VERBS]] as const).map(([k, v]) => `<dt>${k}</dt><dd>${v.join("、")}</dd>`).join("");
 
 function say(msg: string, error = false) { message.textContent = msg; message.classList.toggle("error", error); }
 let renderer: Renderer, script: Script, time = 0, playing = false, last = 0;
@@ -84,4 +86,20 @@ document.fonts?.load(`700 40px "Noto Sans JP"`, "小さな島").then(() => { if 
 text.value = SAMPLE;
 try { renderer = new Renderer(gl); apply(); }
 catch (e) { say((e as Error).message, true); }
-(window as any).__sim = { show, get script() { return script; } };
+let gallery: Gallery | null = null;
+function route() {
+  const assets = location.hash === "#assets";
+  $("view-video").hidden = assets; $("view-assets").hidden = !assets;
+  $("tab-video").toggleAttribute("aria-current", false); $("tab-assets").toggleAttribute("aria-current", false);
+  $(assets ? "tab-assets" : "tab-video").setAttribute("aria-current", "page");
+  if (assets) {
+    setPlaying(false);
+    try { if (!gallery) gallery = new Gallery(() => script); else gallery.draw(); }
+    catch (e) { $("asset-errors").hidden = false; $("asset-errors").textContent = (e as Error).message; }
+  }
+}
+window.addEventListener("hashchange", route);
+route();
+if (catalog.errors.length) say(say_errors(), true);
+function say_errors() { return "読み込めなかった素材があります:\n" + catalog.errors.join("\n"); }
+(window as any).__sim = { show, get script() { return script; }, get gallery() { return gallery; }, catalog };

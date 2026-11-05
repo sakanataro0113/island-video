@@ -1,0 +1,13 @@
+id: haku
+kind: 人物
+name: ハク
+tags: [トマリ村, クロダ家, 村長, 故人]
+born: -37
+died: 15
+clothes: "#a44034"
+hair: "#55524c"
+skin: "#d8ab84"
+hair_style: bald
+states:
+  - {name: 壮年, from_age: 0, height: 1.0}
+  - {name: 老人, from_age: 50, height: 0.96}

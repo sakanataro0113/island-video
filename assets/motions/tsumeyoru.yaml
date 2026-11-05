@@ -1,0 +1,6 @@
+id: tsumeyoru
+kind: 動作
+name: 詰め寄る
+tags: [争い]
+description: 相手に近づいて迫る
+needs_target: true

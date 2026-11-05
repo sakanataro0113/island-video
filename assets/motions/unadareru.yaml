@@ -1,0 +1,6 @@
+id: unadareru
+kind: 動作
+name: うなだれる
+tags: [感情]
+description: 肩と頭を落とす
+needs_target: false

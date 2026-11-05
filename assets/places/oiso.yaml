@@ -1,0 +1,20 @@
+id: oiso
+kind: 場所
+name: 大磯の漁場
+tags: [ナギ村, トマリ村, 海岸]
+terrain: {center_z: -13, radius: 16}
+items:
+  - {asset: pier, at: [4.6, 0, 2.2]}
+  - {asset: boat, at: [-5, 0, 4.2]}
+  - {asset: rock, at: [6.8, 0.1, 1.6], scale: 0.9}
+  - {asset: rock, at: [7.5, 0.1, 0.6], scale: 0.6}
+  - {asset: rock, at: [-7, 0.1, 1.5], scale: 0.8}
+  - {asset: rock, at: [-2.5, 0.1, 4], scale: 0.45}
+  - {asset: hut, at: [-3.6, 0.25, -5.5]}
+  - {asset: hut, at: [3.9, 0.25, -7], scale: 0.85}
+scatter:
+  - {asset: pine, count: 42, seed: 7, ring: [4, 13], scale: [0.8, 1.35]}
+  - {asset: bush, count: 16, seed: 21, ring: [3, 13], scale: [0.7, 1.3]}
+exclude:
+  - {x: [-7, 7], z: [-6, 99]}
+  - {x: [-99, 99], z: [-3, 99]}

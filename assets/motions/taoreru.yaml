@@ -1,0 +1,6 @@
+id: taoreru
+kind: 動作
+name: 倒れる
+tags: [死傷]
+description: 後ろへ倒れて横になる
+needs_target: false

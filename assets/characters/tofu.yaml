@@ -1,0 +1,13 @@
+id: tofu
+kind: 人物
+name: トフ
+tags: [ナギ村, アジロ家, 漁師]
+born: 20
+clothes: "#2f7d5b"
+hair: "#2a1d14"
+skin: "#e6b890"
+hair_style: short
+states:
+  - {name: 若者, from_age: 0, height: 0.96}
+  - {name: 壮年, from_age: 30, height: 1.0}
+  - {name: 老人, from_age: 55, height: 0.94, hair: "#8c8a84"}

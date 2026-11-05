@@ -1,0 +1,8 @@
+id: rock
+kind: 小物
+name: 岩
+tags: [自然物, 海岸]
+states:
+  - name: 通常
+    parts:
+      - {shape: cone, at: [0, 0, 0], radius: 1, height: 1.1, sides: 9, color: "#808085"}
