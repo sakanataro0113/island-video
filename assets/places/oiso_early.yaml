@@ -1,0 +1,14 @@
+id: oiso_early
+kind: 場所
+name: 開拓前の大浜
+tags: [はま村, もり村, 海岸, 1年目]
+terrain: {center_z: -13, radius: 16}
+items:
+  - {asset: rock, at: [-8.6, 0.02, 1.6], scale: 1.1}
+  - {asset: rock, at: [-7.6, 0.02, 3.2], scale: 0.7}
+  - {asset: rock, at: [3.4, 0.02, 4.1], scale: 0.4}
+scatter:
+  - {asset: pine, count: 95, seed: 7, ring: [1, 15], scale: [0.8, 1.35]}
+  - {asset: bush, count: 30, seed: 21, ring: [1, 14], scale: [0.7, 1.3]}
+exclude:
+  - {x: [-99, 99], z: [-3.2, 99]}
