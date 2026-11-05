@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小さな島の年代記 シミュレータ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap">
+<link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+<main class="app">
+  <section class="stage">
+    <div class="frame" id="frame">
+      <canvas id="gl" width="540" height="960" aria-label="3D映像のプレビュー"></canvas>
+      <canvas id="overlay" width="540" height="960" aria-hidden="true"></canvas>
+    </div>
+    <div class="transport">
+      <button id="play" type="button">再生</button>
+      <input id="seek" type="range" min="0" max="1" step="0.01" value="0" aria-label="再生位置">
+      <output id="clock">0.0秒</output>
+    </div>
+    <div class="transport">
+      <button id="export" type="button">MP4を書き出す</button>
+      <button id="save" type="button" hidden>MP4を保存</button>
+      <progress id="progress" max="1" value="0" hidden></progress>
+    </div>
+  </section>
+  <section class="panel">
+    <h1>小さな島の年代記 シミュレータ</h1>
+    <div class="row">
+      <label class="file" for="file">台本を読み込む<input id="file" type="file" accept=".yaml,.yml,.txt"></label>
+      <button id="apply" type="button">台本を反映</button>
+    </div>
+    <label class="lab" for="text">台本</label>
+    <textarea id="text" spellcheck="false"></textarea>
+    <p class="message" id="message" role="status"></p>
+    <details>
+      <summary>使える指定</summary>
+      <dl id="vocab"></dl>
+    </details>
+  </section>
+</main>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

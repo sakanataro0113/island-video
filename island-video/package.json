@@ -1,0 +1,20 @@
+{
+  "name": "island-chronicle-video",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "mp4-muxer": "^5.1.5"
+  }
+}
