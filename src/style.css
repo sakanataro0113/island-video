@@ -61,3 +61,4 @@ dialog h2{margin:0;font-size:20px}dialog h3{margin:0 0 6px;font-size:13px;color:
 .source pre{margin:0;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);padding:10px;overflow:auto;max-height:60vh}
 @media (max-width:760px){.dialog-body{grid-template-columns:minmax(0,1fr)}}
 select{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--rule);padding:6px}
+.transport .check{display:flex;gap:4px;align-items:center;font-size:14px;white-space:nowrap}.transport .check input{flex:none}

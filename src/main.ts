@@ -3,6 +3,7 @@ import { catalog, ofKind } from "./assets";
 import { Gallery } from "./gallery";
 import { Renderer, drawSubtitle } from "./render";
 import { exportMp4, saveFile, type ExportResult } from "./export";
+import { VoicePlayer, mixVoices, prepareVoices, voiceErrors } from "./voice";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const gl = $<HTMLCanvasElement>("gl"), overlay = $<HTMLCanvasElement>("overlay"), text = $<HTMLTextAreaElement>("text");
@@ -11,7 +12,9 @@ const seek = $<HTMLInputElement>("seek"), clock = $<HTMLOutputElement>("clock"),
 $("vocab").innerHTML = ([["人物", ofKind("人物").map(c => c.name)], ["場所", ofKind("場所").map(p => p.name)], ["時間帯", TIMES], ["カメラ", CAMERAS], ["動作", VERBS]] as const).map(([k, v]) => `<dt>${k}</dt><dd>${v.join("、")}</dd>`).join("");
 
 function say(msg: string, error = false) { message.textContent = msg; message.classList.toggle("error", error); }
-let renderer: Renderer, script: Script, time = 0, playing = false, last = 0;
+let renderer: Renderer, script: Script, time = 0, playing = false, last = 0, voiceGen = 0, voiceNote = "";
+const voiceBox = $<HTMLInputElement>("voice"), player = new VoicePlayer();
+const voiceOn = () => voiceBox.checked;
 
 function show(t: number) {
   time = t;
@@ -21,14 +24,42 @@ function show(t: number) {
   clock.textContent = `${t.toFixed(1)}秒`;
 }
 function apply(): boolean {
-  try { script = parseScript(text.value); }
+  try { script = parseScript(text.value, voiceOn()); }
   catch (e) { say((e as Error).message, true); return false; }
   seek.max = String(script.duration);
-  say(`「${script.title}」 ${script.scenes.length}シーン、${script.duration}秒`);
+  report();
   show(Math.min(time, script.duration));
+  void refreshVoice();
   return true;
 }
-function setPlaying(v: boolean) { playing = v; play.textContent = v ? "停止" : "再生"; if (v) { last = performance.now(); requestAnimationFrame(tick); } }
+function report() {
+  const spoken = script.scenes.filter(s => s.voice).length;
+  say(`「${script.title}」 ${script.scenes.length}シーン、${script.duration.toFixed(1)}秒` + (voiceOn() ? `、読み上げ ${spoken}カット` : "、音声なし") + (voiceNote ? "\n" + voiceNote : ""), !!voiceNote);
+}
+/** 足りない音声を取りに行き、そろったらカットの長さを音声に合わせ直す。 */
+async function refreshVoice(): Promise<boolean> {
+  if (!voiceOn() || !script) return true;
+  const gen = ++voiceGen, wanted = script.scenes.flatMap(s => s.voice ? [s.voice] : []);
+  try {
+    const made = await prepareVoices(wanted, (done, total) => { if (gen === voiceGen) say(`音声を準備中: ${done} / ${total}`); });
+    voiceNote = "";
+    if (gen !== voiceGen) return true;
+    if (made || script.scenes.some(s => s.voice)) {
+      const wasPlaying = playing; if (wasPlaying) setPlaying(false);
+      script = parseScript(text.value, true); seek.max = String(script.duration); report(); show(Math.min(time, script.duration));
+      if (wasPlaying) setPlaying(true);
+    }
+    return true;
+  } catch (e) {
+    if (gen === voiceGen) { voiceNote = "音声を用意できませんでした: " + (e as Error).message; report(); }
+    return false;
+  }
+}
+function setPlaying(v: boolean) {
+  playing = v; play.textContent = v ? "停止" : "再生";
+  if (v) { last = performance.now(); if (voiceOn()) player.play(script.scenes, time); requestAnimationFrame(tick); }
+  else player.stop();
+}
 function tick(now: number) {
   if (!playing) return;
   const next = time + (now - last) / 1000; last = now;
@@ -37,6 +68,7 @@ function tick(now: number) {
 }
 play.onclick = () => { if (!playing && time >= script.duration) show(0); setPlaying(!playing); };
 seek.oninput = () => { setPlaying(false); show(Number(seek.value)); };
+voiceBox.onchange = () => { setPlaying(false); voiceNote = ""; apply(); };
 $("apply").onclick = () => { setPlaying(false); if (apply()) show(0); };
 $<HTMLInputElement>("file").onchange = async e => {
   const f = (e.target as HTMLInputElement).files?.[0]; if (!f) return;
@@ -60,13 +92,15 @@ exportBtn.onclick = async () => {
   exportBtn.textContent = "中止"; play.disabled = true; seek.disabled = true; progress.hidden = false; progress.value = 0;
   try {
     const fontOk = await subtitleFontReady();
+    if (voiceOn() && !(await refreshVoice())) throw new Error(voiceNote + "\n「音声」のチェックを外すと、音声なしで書き出せます。");
     const current = script;
-    const out = await exportMp4(renderer, overlay, gl, current, (done, total) => { progress.value = done / total; say(`書き出し中: ${done} / ${total}コマ`); }, abort.signal);
+    const audio = voiceOn() && current.scenes.some(s => s.voice) ? await mixVoices(current.scenes, current.duration) : null;
+    const out = await exportMp4(renderer, overlay, gl, current, audio, (done, total) => { progress.value = done / total; say(`書き出し中: ${done} / ${total}コマ`); }, abort.signal);
     result = out; resultTitle = current.title;
     saveBtn.hidden = false;
     const mb = (out.data.length / 1048576).toFixed(1);
     const notes = [out.codec === "H.264" ? "" : "このブラウザではH.264を使えなかったため、一部のアプリで再生できない可能性があります。", fontOk ? "" : "字幕の専用フォントを読み込めず、PCの標準フォントで書き出しました。"].filter(Boolean).join("\n");
-    say(`書き出し完了: 1080×1920、30fps、${out.seconds.toFixed(1)}秒、${out.codec}、${mb}MB${notes ? "\n" + notes : ""}`);
+    say(`書き出し完了: 1080×1920、30fps、${out.seconds.toFixed(1)}秒、${out.codec}${out.audio ? "、音声 " + out.audio : "、音声なし"}、${mb}MB${notes ? "\n" + notes : ""}`);
   } catch (e) {
     if ((e as Error).name === "AbortError") say("書き出しを中止しました。");
     else say("書き出しできませんでした: " + (e as Error).message, true);
@@ -105,5 +139,6 @@ function route() {
 window.addEventListener("hashchange", route);
 route();
 if (catalog.errors.length) say(say_errors(), true);
+if (voiceErrors.length) say(voiceErrors.join("\n"), true);
 function say_errors() { return "読み込めなかった素材があります:\n" + catalog.errors.join("\n"); }
 (window as any).__sim = { show, get script() { return script; }, get gallery() { return gallery; }, catalog };

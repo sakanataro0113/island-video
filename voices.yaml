@@ -1,0 +1,16 @@
+# 読み上げの声(Google Cloud TTS の Chirp 3: HD)
+# 声の名前は ja-JP-Chirp3-HD-○○ の形。試聴して気に入った声の名前を書く。
+# 声を変えると、次に再生するときに作り直す(作った音声はブラウザに保存され、同じ文は二度作らない)。
+
+# 歴史家の語り(speaker のないカット)
+narrator: ja-JP-Chirp3-HD-Charon
+
+# 読む速さ。1.0 が標準。日本語で効かない場合は 1.0 のままにする
+rate: 1.0
+
+# セリフの声。ここに書いた人物だけセリフを読み上げる。書かない人物のセリフは字幕のみ
+characters:
+  # イサオ: ja-JP-Chirp3-HD-Orus
+  # タケゾウ: ja-JP-Chirp3-HD-Fenrir
+  # ゲンタ: ja-JP-Chirp3-HD-Puck
+  # ハナ: ja-JP-Chirp3-HD-Kore
