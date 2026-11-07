@@ -1,4 +1,4 @@
-import { catalog, looksOf, placeByName, type Asset, type Look, type ModelAsset, type PlaceAsset } from "./assets";
+import { catalog, characterByName, looksOf, placeByName, type Asset, type Look, type ModelAsset, type PlaceAsset } from "./assets";
 import { buildBlob, buildCube, buildDome, buildSkirt, buildModel, buildPlace, buildSea, terrainHeight, type Terrain } from "./mesh";
 import { chain, rng, clamp01, ease, identity, lerp, lookAt, perspective, rotX, rotY, scale, translate, type Mat4, type Vec3 } from "./math";
 import { sceneAt, type Prop, type Scene, type Script } from "./script";
@@ -204,7 +204,7 @@ export class Renderer {
   }
   render(script:Script,time:number){
     const t=Math.min(time,script.duration),scene=sceneAt(script,t),sky=SKIES[scene.time],{eye,at}=cameraAt(scene,t),place=this.place(scene.place);
-    this.setup(sky,eye,at,t,260);
+    const big=place.terrain.radius>30; this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120);
     this.gl.depthMask(false); this.gl.uniform1f(this.u.uSky,1); this.gl.uniform3fv(this.u.uSkyTop,sky.top); this.draw("dome",translate(eye[0],eye[1],eye[2])); this.gl.uniform1f(this.u.uSky,0); this.gl.depthMask(true);
     const lv=scene.sea?lerp(scene.sea[0],scene.sea[1],ease((t-scene.start)/scene.seconds)):0;
     this.draw("sea",translate(0,lv,0),[1,1,1],scene.storm?.45:.12);
@@ -262,9 +262,11 @@ export function drawSubtitle(canvas: HTMLCanvasElement, script: Script, time: nu
     }
     lines.push(line);
   }
-  const who=scene.speaker??"歴史家シオンの記録",whoSize=21*u,lh=size*1.42,h=15*u+whoSize*1.35+lh*lines.length+12*u,y=H*.6;
-  rounded(x,y,boxW,h,8*u,!!scene.speaker); c.fillStyle=paper; c.fill(); c.lineWidth=2*u; c.strokeStyle=ink; c.stroke();
-  c.font=`700 ${whoSize}px ${font}`; c.fillStyle=key; c.fillText(who,x+pad,y+15*u+whoSize);
+  const tags=scene.speaker?characterByName(scene.speaker)?.tags??[]:[];
+  const village=tags.includes("はま村")?"#0b7a6e":tags.includes("もり村")?"#7a3fa6":null;
+  const who=scene.speaker??"歴史家の記録",whoSize=21*u,lh=size*1.42,h=15*u+whoSize*1.35+lh*lines.length+12*u,y=H*.6;
+  rounded(x,y,boxW,h,8*u,!!scene.speaker); c.fillStyle=paper; c.fill(); c.lineWidth=(village?3.5:2)*u; c.strokeStyle=village??ink; c.stroke();
+  c.font=`700 ${whoSize}px ${font}`; c.fillStyle=village??key; c.fillText(who,x+pad,y+15*u+whoSize);
   c.font=`700 ${size}px ${font}`;
   lines.forEach((line,i)=>{ let px=x+pad; const py=y+15*u+whoSize*1.35+lh*i+size*1.08; for(const run of line){ c.fillStyle=run.strong?key:ink; c.fillText(run.text,px,py); px+=c.measureText(run.text).width; } });
 }

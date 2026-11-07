@@ -112,11 +112,15 @@ export function buildPlace(place: PlaceAsset, byId: Map<string, Asset>): Float32
     const a = byId.get(item.asset) as ModelAsset;
     addParts(m, a.parts[item.state ?? a.states[0]], item.ground ? [item.at[0], item.at[1]+terrainHeight(place.terrain,item.at[0],item.at[2]), item.at[2]] : item.at, item.scale, item.rot);
   }
+  const taken: [number, number, number][] = [];
   for (const s of place.scatter) {
     const a = byId.get(s.asset) as ModelAsset, q = rng(s.seed);
     for (let k = 0; k < s.count; k++) {
       const angle = q()*Math.PI*2, d = s.ring[0]+q()*(s.ring[1]-s.ring[0]), x = Math.cos(angle)*d, z = centerZ+Math.sin(angle)*d, sc = s.scale[0]+q()*(s.scale[1]-s.scale[0]);
       if (place.exclude.some(e => x>=e.x[0] && x<=e.x[1] && z>=e.z[0] && z<=e.z[1])) continue;
+      const r = s.spacing*sc;
+      if (r > 0 && taken.some(([tx,tz,tr]) => Math.hypot(tx-x,tz-z) < r+tr)) { q(); continue; }
+      if (r > 0) taken.push([x,z,r]);
       addParts(m, a.parts[a.states[0]], [x, terrainHeight(place.terrain,x,z), z], sc, q()*360);
     }
   }

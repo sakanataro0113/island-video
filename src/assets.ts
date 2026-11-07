@@ -20,7 +20,7 @@ export type PlaceAsset = Base & {
   kind: "場所";
   terrain: { centerZ: number; radius: number };
   items: { asset: string; at: Vec3; scale: number; rot: number; ground: boolean; state?: string }[];
-  scatter: { asset: string; count: number; seed: number; ring: [number, number]; scale: [number, number] }[];
+  scatter: { asset: string; count: number; seed: number; ring: [number, number]; scale: [number, number]; spacing: number }[];
   exclude: { x: [number, number]; z: [number, number] }[];
 };
 export type MotionAsset = Base & { kind: "動作"; description: string; needsTarget: boolean };
@@ -64,7 +64,7 @@ export function parseAsset(raw: string, source: string): Asset {
   }
   if (d.kind === "場所") {
     const items = (d.items ?? []).map((i: any) => ({ asset: String(i.asset), at: vec(i.at, "items.at"), scale: num(i.scale ?? 1, "items.scale"), rot: num(i.rot ?? 0, "items.rot"), ground: !!i.ground, state: i.state === undefined ? undefined : String(i.state) }));
-    const scatter = (d.scatter ?? []).map((s: any) => ({ asset: String(s.asset), count: num(s.count, "scatter.count"), seed: num(s.seed, "scatter.seed"), ring: pair(s.ring, "scatter.ring"), scale: pair(s.scale ?? [1, 1], "scatter.scale") }));
+    const scatter = (d.scatter ?? []).map((s: any) => ({ asset: String(s.asset), count: num(s.count, "scatter.count"), seed: num(s.seed, "scatter.seed"), ring: pair(s.ring, "scatter.ring"), scale: pair(s.scale ?? [1, 1], "scatter.scale"), spacing: num(s.spacing ?? 0, "scatter.spacing") }));
     const exclude = (d.exclude ?? []).map((e: any) => ({ x: pair(e.x, "exclude.x"), z: pair(e.z, "exclude.z") }));
     return { ...base, kind: "場所", terrain: { centerZ: num(d.terrain?.center_z, "terrain.center_z"), radius: num(d.terrain?.radius, "terrain.radius") }, items, scatter, exclude, states: [...TIMES] };
   }

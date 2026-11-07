@@ -1,0 +1,19 @@
+id: tower
+kind: 建物
+name: 物見櫓
+tags: [故郷, 木造]
+states:
+  - name: 健在
+    parts:
+      - {shape: cylinder, at: [-0.7, 0, -0.7], rot: [6, 0, -6], radius: 0.1, top: 0.08, height: 4.2, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [0.7, 0, -0.7], rot: [6, 0, 6], radius: 0.1, top: 0.08, height: 4.2, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [-0.7, 0, 0.7], rot: [-6, 0, -6], radius: 0.1, top: 0.08, height: 4.2, sides: 7, color: "#5c4029"}
+      - {shape: cylinder, at: [0.7, 0, 0.7], rot: [-6, 0, 6], radius: 0.1, top: 0.08, height: 4.2, sides: 7, color: "#5c4029"}
+      - {shape: box, at: [0, 1.6, 0], size: [1.4, 0.08, 0.08], color: "#6b4a2e"}
+      - {shape: box, at: [0, 1.6, 0], size: [0.08, 0.08, 1.4], color: "#6b4a2e"}
+      - {shape: box, at: [0, 4.1, 0], size: [1.4, 0.12, 1.4], color: "#7a5333"}
+      - {shape: box, at: [0, 4.45, 0.66], size: [1.4, 0.6, 0.06], color: "#8a6039"}
+      - {shape: box, at: [0, 4.45, -0.66], size: [1.4, 0.6, 0.06], color: "#8a6039"}
+      - {shape: box, at: [0.66, 4.45, 0], size: [0.06, 0.6, 1.4], color: "#8a6039"}
+      - {shape: box, at: [-0.66, 4.45, 0], size: [0.06, 0.6, 1.4], color: "#8a6039"}
+      - {shape: cone, at: [0, 5.1, 0], radius: 1.2, height: 0.9, sides: 4, color: "#8d5238"}
