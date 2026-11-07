@@ -1,0 +1,21 @@
+id: fish_half
+kind: 小物
+name: 半分の魚
+tags: [海の幸, 約束]
+states:
+  - name: 頭側
+    parts:
+      - {shape: sphere, at: [0, 0, 0], clip: front, scale: [0.09, 0.14, 0.32], detail: 2, jitter: 0.02, seed: 2, color: "#a9c1c8"}
+      - {shape: sphere, at: [0, 0.035, 0], clip: front, scale: [0.075, 0.11, 0.3], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: sphere, at: [0, 0.005, -0.004], scale: [0.084, 0.128, 0.004], detail: 2, color: "#e7a191"}
+      - {shape: sphere, at: [0, 0.01, -0.008], scale: [0.016, 0.016, 0.003], detail: 1, color: "#f4ece2"}
+      - {shape: cone, at: [0, 0.12, 0.08], radius: 0.05, height: 0.1, sides: 5, color: "#48697a"}
+      - {shape: box, at: [0.082, 0.035, 0.22], size: [0.02, 0.035, 0.035], color: "#111418"}
+      - {shape: box, at: [-0.082, 0.035, 0.22], size: [0.02, 0.035, 0.035], color: "#111418"}
+  - name: 尾側
+    parts:
+      - {shape: sphere, at: [0, 0, 0], clip: back, scale: [0.09, 0.14, 0.32], detail: 2, jitter: 0.02, seed: 2, color: "#a9c1c8"}
+      - {shape: sphere, at: [0, 0.035, 0], clip: back, scale: [0.075, 0.11, 0.3], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: sphere, at: [0, 0.005, 0.004], scale: [0.084, 0.128, 0.004], detail: 2, color: "#e7a191"}
+      - {shape: sphere, at: [0, 0.01, 0.008], scale: [0.016, 0.016, 0.003], detail: 1, color: "#f4ece2"}
+      - {shape: cone, at: [0, 0, -0.26], radius: 0.13, height: 0.2, sides: 6, rot: [-90, 0, 0], color: "#48697a"}

@@ -10,7 +10,7 @@ export type Part = PartBase & (
   | { shape: "box"; size: Vec3 }
   | { shape: "cone"; radius: number; height: number; sides: number; jitter: number; seed: number }
   | { shape: "cylinder"; radius: number; top: number; height: number; sides: number }
-  | { shape: "sphere"; scale: Vec3; detail: number; jitter: number; seed: number }
+  | { shape: "sphere"; scale: Vec3; detail: number; jitter: number; seed: number; clip?: "front" | "back" }
   | { shape: "loft"; sections: [number, number, number, number][] });
 type Base = { id: string; kind: Kind; name: string; tags: string[]; source: string; raw: string; states: string[] };
 export type Look = { clothes: Vec3; hair: Vec3; skin: Vec3; height: number; hairStyle: "short" | "long" | "bald"; stoop: number; skirt: boolean; chief: boolean };
@@ -40,7 +40,7 @@ function parsePart(p: any, where: string): Part {
   if (p.shape === "box") return { ...base, shape: "box", size: vec(p.size, where + " size") };
   if (p.shape === "cone") return { ...base, shape: "cone", radius: num(p.radius, where + " radius"), height: num(p.height, where + " height"), sides: sides(), jitter: num(p.jitter ?? 0, where + " jitter"), seed: num(p.seed ?? 1, where + " seed") };
   if (p.shape === "cylinder") return { ...base, shape: "cylinder", radius: num(p.radius, where + " radius"), top: num(p.top ?? p.radius, where + " top"), height: num(p.height, where + " height"), sides: sides() };
-  if (p.shape === "sphere") return { ...base, shape: "sphere", scale: vec(p.scale ?? [1, 1, 1], where + " scale"), detail: Math.min(3, Math.max(0, Math.round(num(p.detail ?? 1, where + " detail")))), jitter: num(p.jitter ?? 0, where + " jitter"), seed: num(p.seed ?? 1, where + " seed") };
+  if (p.shape === "sphere") return { ...base, shape: "sphere", scale: vec(p.scale ?? [1, 1, 1], where + " scale"), detail: Math.min(3, Math.max(0, Math.round(num(p.detail ?? 1, where + " detail")))), jitter: num(p.jitter ?? 0, where + " jitter"), seed: num(p.seed ?? 1, where + " seed"), clip: p.clip === "front" || p.clip === "back" ? p.clip : undefined };
   if (p.shape === "loft" && Array.isArray(p.sections) && p.sections.length >= 2) return { ...base, shape: "loft", sections: p.sections.map((q: unknown) => { if (!Array.isArray(q) || q.length !== 4) throw new Error(`${where} の sections は [位置, 半幅, 下, 上] の形で書いてください。`); return q.map(n => num(n, where)) as [number, number, number, number]; }) };
   throw new Error(`${where} の shape は box、cone、cylinder、sphere、loft から選んでください。`);
 }

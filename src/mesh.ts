@@ -44,7 +44,7 @@ function icosphere(m: MeshBuilder, part: Extract<Part, { shape: "sphere" }>) {
   let f: [Vec3,Vec3,Vec3][] = ([[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]] as const).map(([a,b,c]) => [v[a],v[b],v[c]]);
   const mid = (a: Vec3, b: Vec3) => norm([(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2]);
   for (let d = 0; d < part.detail; d++) f = f.flatMap(([a,b,c]) => { const ab=mid(a,b),bc=mid(b,c),ca=mid(c,a); return [[a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca]] as [Vec3,Vec3,Vec3][]; });
-  const out = (q: Vec3): Vec3 => { const k = 1+(hash3(q[0],q[1],q[2],part.seed)-.5)*part.jitter*2; return [q[0]*k*part.scale[0],q[1]*k*part.scale[1],q[2]*k*part.scale[2]]; };
+  const out = (q0: Vec3): Vec3 => { const q: Vec3 = part.clip === "front" ? [q0[0],q0[1],Math.max(q0[2],0)] : part.clip === "back" ? [q0[0],q0[1],Math.min(q0[2],0)] : q0; const k = 1+(hash3(q[0],q[1],q[2],part.seed)-.5)*part.jitter*2; return [q[0]*k*part.scale[0],q[1]*k*part.scale[1],q[2]*k*part.scale[2]]; };
   for (const [a,b,c] of f) m.tri(out(a),out(b),out(c),part.color);
 }
 function buildPart(m: MeshBuilder, part: Part) {

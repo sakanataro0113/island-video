@@ -27,8 +27,8 @@ const SKIES: Record<Scene["time"], Sky> = {
 const normV = (v: Vec3): Vec3 => { const l=Math.hypot(...v); return [v[0]/l,v[1]/l,v[2]/l]; };
 
 /** ある時刻の役者の姿勢。時刻だけで決まるので、どこへ移動しても同じ絵になる。 */
-export type Pose = { x:number; z:number; yaw:number; legSwing:number; armR:number; armL:number; fall:number; slump:number; lean:number; look:number; sit:number; hold:boolean; hop:number };
-export const idlePose = (): Pose => ({ x:0, z:0, yaw:0, legSwing:0, armR:0, armL:0, fall:0, slump:0, lean:0, look:0, sit:0, hold:false, hop:0 });
+export type Pose = { x:number; z:number; yaw:number; legSwing:number; armR:number; armL:number; fall:number; slump:number; lean:number; look:number; sit:number; hold:boolean; hop:number; bust:boolean; y?:number };
+export const idlePose = (): Pose => ({ x:0, z:0, yaw:0, legSwing:0, armR:0, armL:0, fall:0, slump:0, lean:0, look:0, sit:0, hold:false, hop:0, bust:false });
 export function poseAt(scene: Scene, name: string, t: number): Pose {
   const n = scene.cast.length, homeX = (who: string) => scene.positions[who]?.[0] ?? (scene.cast.indexOf(who)-(n-1)/2)*(n>2 ? 1.4 : 2.2);
   const others = scene.cast.filter(c => c !== name);
@@ -78,6 +78,11 @@ function cameraAt(scene: Scene, t: number): { eye: Vec3; at: Vec3 } {
   return { eye:[cx*.8+Math.sin(az)*dist, 1.4+dist*.14, Math.cos(az)*dist], at:[cx,1.0,0] };
 }
 
+const PALETTES:Record<string,Vec3[]>={
+  hama:[[.18,.5,.47],[.22,.42,.58],[.76,.68,.5],[.3,.58,.52],[.16,.36,.44]],
+  mori:[[.42,.27,.55],[.5,.33,.2],[.33,.42,.24],[.55,.36,.5],[.38,.3,.22]],
+  mixed:[[.2,.5,.46],[.7,.34,.3],[.76,.6,.25],[.4,.36,.6],[.36,.56,.34],[.62,.44,.3],[.72,.68,.56]],
+};
 export class Renderer {
   private gl: WebGL2RenderingContext;
   private u: Record<string, WebGLUniformLocation | null> = {};
@@ -101,18 +106,18 @@ export class Renderer {
   private place(name:string):PlaceAsset{ const place=placeByName(name)!; const key="place:"+place.id; if(!this.meshes[key]) this.add(key,buildPlace(place,catalog.byId)); return place; }
   private actor(look:Look,pose:Pose,terrain:Terrain|null){
     const {clothes:cloth,hair,skin,height,hairStyle,stoop}=look,legs:Vec3=[.25,.22,.2];
-    const y=(terrain?terrainHeight(terrain,pose.x,pose.z):0)+pose.hop;
-    this.gl.depthMask(false); this.draw("blob",chain(translate(pose.x,y+.03,pose.z),scale(.5+pose.fall*.5,1,.5+pose.fall*.2)),[0,0,0],0,.28); this.gl.depthMask(true);
+    const y=(pose.y!==undefined?pose.y:terrain?terrainHeight(terrain,pose.x,pose.z):0)+pose.hop;
+    if(!pose.bust){ this.gl.depthMask(false); this.draw("blob",chain(translate(pose.x,y+.03,pose.z),scale(.5+pose.fall*.5,1,.5+pose.fall*.2)),[0,0,0],0,.28); this.gl.depthMask(true); }
     const root=chain(translate(pose.x,y,pose.z),rotY(pose.yaw),translate(0,-.42*pose.sit,0),rotX(-pose.fall*Math.PI/2*.97-pose.lean),translate(0,pose.fall*.2,0),scale(height,height,height));
     const part=(cx:number,cy:number,cz:number,w:number,h:number,d:number,col:Vec3,base=root)=>this.draw("cube",chain(base,translate(cx,cy,cz),scale(w,h,d)),col);
     const limb=(x:number,top:number,angle:number,w:number,len:number,col:Vec3)=>{ const b=chain(root,translate(x,top,0),rotX(angle)); part(0,-len/2,0,w,len,w,col,b); };
-    limb(-.13,.68,pose.legSwing-pose.sit*1.35,.17,.66,legs); limb(.13,.68,-pose.legSwing-pose.sit*1.35,.17,.66,legs);
+    if(!pose.bust){ limb(-.13,.68,pose.legSwing-pose.sit*1.35,.17,.66,legs); limb(.13,.68,-pose.legSwing-pose.sit*1.35,.17,.66,legs); }
     const spine=chain(root,translate(0,.68,0),rotX(pose.slump*.22+stoop*.55));
     part(0,.33,0,look.skirt?.42:.52,.68,look.skirt?.26:.3,cloth,spine);
     const belt:Vec3=[cloth[0]*.5,cloth[1]*.5,cloth[2]*.5];
     part(0,.055,0,look.skirt?.45:.55,.075,look.skirt?.29:.33,belt,spine);
     part(0,.67,0,.22,.05,.2,skin,spine);
-    if(look.skirt) this.draw("skirt",chain(root,translate(0,.33,0)),[cloth[0]*.82,cloth[1]*.82,cloth[2]*.82]);
+    if(look.skirt&&!pose.bust) this.draw("skirt",chain(root,translate(0,.33,0)),[cloth[0]*.82,cloth[1]*.82,cloth[2]*.82]);
     const inward=pose.hold?.48:0;
     const armPivot=(x:number,a:number)=>{ const b=chain(spine,translate(x,.6,0),rotY(-Math.sign(x)*inward),rotX(a)); part(0,-.27,0,.14,.55,.14,cloth,b); part(0,-.6,0,.13,.13,.13,skin,b); };
     armPivot(-.33,pose.armL-(pose.armL?0:pose.legSwing*.7)+pose.slump*.1); armPivot(.33,pose.armR+(pose.armR?0:pose.legSwing*.7)+pose.slump*.1);
@@ -134,8 +139,20 @@ export class Renderer {
     g.uniformMatrix4fv(this.u.uVP,false,chain(perspective(.72,c.width/c.height,.25,far),lookAt(eye,at)));
     g.uniform1f(this.u.uTime,t); g.uniform3fv(this.u.uSun,normV(sky.sun)); g.uniform3fv(this.u.uSunCol,sky.sunCol); g.uniform3fv(this.u.uAmb,sky.amb); g.uniform3fv(this.u.uFog,clear); g.uniform3fv(this.u.uEye,eye); g.uniform1f(this.u.uFogFar,fogFar);
   }
+  private villager(q:()=>number,palette?:string):Look{
+    const cloths=PALETTES[palette??""]??PALETTES.mixed,hairs:Vec3[]=[[.14,.1,.08],[.3,.2,.11],[.55,.53,.48],[.1,.1,.13]],woman=q()<.5,child=q()<.14;
+    return {clothes:cloths[Math.floor(q()*cloths.length)],hair:hairs[Math.floor(q()*hairs.length)],skin:[.82+q()*.1,.62+q()*.1,.46+q()*.1],height:child?.66:.86+q()*.14,hairStyle:woman?"long":"short",stoop:0,skirt:woman,chief:false};
+  }
+  private riders(r:NonNullable<Prop["riders"]>,at:Vec3,yaw:number,size:number,t:number){
+    const q=rng(r.seed),c=Math.cos(yaw),s=Math.sin(yaw);
+    for(let i=0;i<r.count;i++){
+      const row=i%2,col=Math.floor(i/2),cols=Math.ceil(r.count/2),lx=(cols>1?col/(cols-1):.5)*1.7-.95,lz=row?.2:-.2;
+      const look=this.villager(q,r.palette),bob=Math.sin(t*1.6+i)*.02;
+      this.actor(look,{...idlePose(),bust:true,x:at[0]+(c*lx+s*lz)*size,z:at[2]+(-s*lx+c*lz)*size,y:at[1]+(.02+bob)*size,yaw:yaw+Math.PI/2,slump:.3},null);
+    }
+  }
   private crowdAt(c:NonNullable<Scene["crowd"]>,t:number,terrain:Terrain){
-    const q=rng(c.seed),cloths:Vec3[]=[[.2,.5,.46],[.7,.34,.3],[.76,.6,.25],[.4,.36,.6],[.36,.56,.34],[.62,.44,.3],[.72,.68,.56]],hairs:Vec3[]=[[.14,.1,.08],[.3,.2,.11],[.55,.53,.48],[.1,.1,.13]];
+    const q=rng(c.seed),cloths:Vec3[]=PALETTES[c.palette??""]??[[.2,.5,.46],[.7,.34,.3],[.76,.6,.25],[.4,.36,.6],[.36,.56,.34],[.62,.44,.3],[.72,.68,.56]],hairs:Vec3[]=[[.14,.1,.08],[.3,.2,.11],[.55,.53,.48],[.1,.1,.13]];
     for(let i=0;i<c.count;i++){
       const a=q()*Math.PI*2,d=c.radius[0]+q()*(c.radius[1]-c.radius[0]),x=c.center[0]+Math.cos(a)*d,z=c.center[1]+Math.sin(a)*d,woman=q()<.5,phase=q()*6,height=.82+q()*.2;
       const look:Look={clothes:cloths[Math.floor(q()*cloths.length)],hair:hairs[Math.floor(q()*hairs.length)],skin:[.82+q()*.1,.62+q()*.1,.46+q()*.1],height,hairStyle:woman?"long":q()<.15?"bald":"short",stoop:0,skirt:woman,chief:false};
@@ -145,11 +162,11 @@ export class Renderer {
     }
     let n=0;
     for(const l of c.lines) for(let i=0;i<l.count;i++){
-      const f=l.count>1?i/(l.count-1):0,x=lerp(l.from[0],l.to[0],f),z=lerp(l.from[1],l.to[1],f)+(q()-.5)*.25,woman=q()<.5,child=q()<.14,phase=q()*6;
-      const look:Look={clothes:cloths[Math.floor(q()*cloths.length)],hair:hairs[Math.floor(q()*hairs.length)],skin:[.82+q()*.1,.62+q()*.1,.46+q()*.1],height:child?.66:.86+q()*.14,hairStyle:woman?"long":"short",stoop:0,skirt:woman,chief:false};
+      const f=l.count>1?i/(l.count-1):0,x=lerp(l.from[0],l.to[0],f),z=lerp(l.from[1],l.to[1],f)+(q()-.5)*.25,phase=q()*6;
+      const look=this.villager(q,l.palette??c.palette);
       const pose:Pose={...idlePose(),x,z,yaw:l.face};
       if(c.tug){ const w=Math.sin(t*7+phase); pose.armR=pose.armL=-1.5; pose.hold=true; pose.lean=.25+w*.1; pose.legSwing=w*.25; }
-      if(c.fallAt!==undefined){ pose.fall=ease((t-c.fallAt-n*.05)/.35); if(pose.fall>0){ pose.armR=pose.armL=0; pose.hold=false; pose.lean=0; } }
+      const fallAt=l.fallAt??c.fallAt; if(fallAt!==undefined){ pose.fall=ease((t-fallAt-n*.05)/.35); if(pose.fall>0){ pose.armR=pose.armL=0; pose.hold=false; pose.lean=0; } }
       n++; this.actor(look,pose,terrain);
     }
   }
@@ -161,6 +178,7 @@ export class Renderer {
     const state=p.flap?p.flap[Math.floor(t*7)%2]:p.state;
     const growth=p.grow?Math.max(.001,ease((local-p.grow[0])/(p.grow[1]-p.grow[0]))):1;
     this.draw(this.model(p.asset,state),chain(translate(at[0],at[1],at[2]),rotY(yaw),scale(p.scale,p.scale,p.scale*growth)));
+    if(p.riders) this.riders(p.riders,at,yaw,p.scale,t);
   }
   /** 素材1件を、背景なしで全体が収まるように描く。 */
   preview(asset:Asset,state:string,az:number,t:number){
@@ -214,7 +232,7 @@ export function drawSubtitle(canvas: HTMLCanvasElement, script: Script, time: nu
   if(scene.flashback){ c.fillStyle="rgba(120,84,36,.32)"; c.fillRect(0,0,W,H); const g=c.createRadialGradient(W/2,H/2,H*.28,W/2,H/2,H*.68); g.addColorStop(0,"rgba(20,10,0,0)"); g.addColorStop(1,"rgba(20,10,0,.55)"); c.fillStyle=g; c.fillRect(0,0,W,H); }
   c.lineJoin="round";
   for(const l of scene.labels){ const px=l.x*W,py=l.y*H,big=W*.07,small=W*.034; c.font=`700 ${big}px ${font}`; const w=c.measureText(l.text).width; c.font=`700 ${small}px ${font}`; const bw=Math.max(w,l.sub?c.measureText(l.sub).width:0)+W*.07,bh=l.sub?W*.15:W*.105; c.fillStyle="rgba(255,255,255,.88)"; c.strokeStyle="#1a1a1a"; c.lineWidth=W*.004; c.beginPath(); c.roundRect(px-bw/2,py-bh/2,bw,bh,W*.015); c.fill(); c.stroke(); c.textAlign="center"; c.fillStyle="#1a1a1a"; c.font=`700 ${big}px ${font}`; c.fillText(l.text,px,py+(l.sub?-W*.003:W*.025)); if(l.sub){ c.fillStyle="#0017c1"; c.font=`700 ${small}px ${font}`; c.fillText(l.sub,px,py+W*.052); } }
-  if(scene.caption){ c.font=`700 ${W*.05}px ${font}`; c.lineWidth=W*.012; c.strokeStyle="rgba(10,20,25,.85)"; c.fillStyle="#fff2c8"; c.strokeText(scene.caption,W/2,H*.17); c.fillText(scene.caption,W/2,H*.17); }
+  if(scene.caption){ const cu=W/533; c.font=`700 ${24*cu}px ${font}`; const w=c.measureText(scene.caption).width+28*cu,x=32*cu,y=130*cu,h=44*cu; c.fillStyle="#0017c1"; c.beginPath(); c.roundRect(x,y,w,h,8*cu); c.fill(); c.fillStyle="#fff"; c.textAlign="left"; c.fillText(scene.caption,x+14*cu,y+h*.7); c.textAlign="center"; }
   const u=W/533,ink="#1a1a1a",key="#0017c1",paper="rgba(255,255,255,.7)";
   c.textAlign="left"; c.textBaseline="alphabetic";
   const rounded=(x:number,y:number,w:number,h:number,r:number,tail=false)=>{ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); if(tail){ const tx=x+46*u; c.lineTo(tx+24*u,y+h); c.lineTo(tx+12*u,y+h+15*u); c.lineTo(tx,y+h); } c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); };

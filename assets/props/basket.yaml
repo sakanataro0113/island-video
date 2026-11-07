@@ -1,0 +1,31 @@
+id: basket
+kind: 小物
+name: 食料かご
+tags: [食料, 村]
+states:
+  - name: 満
+    parts:
+      - {shape: cylinder, at: [0, 0, 0], radius: 0.36, top: 0.46, height: 0.5, sides: 14, color: "#a07a45"}
+      - {shape: cylinder, at: [0, 0.47, 0], radius: 0.47, top: 0.47, height: 0.05, sides: 14, color: "#7d5d33"}
+      - {shape: cylinder, at: [0, 0.02, 0], radius: 0.37, top: 0.37, height: 0.42, sides: 14, color: "#3a2a18"}
+      - {shape: sphere, at: [-0.20, 0.42, -0.18], rot: [0, 0, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 1, color: "#9fb2b5"}
+      - {shape: sphere, at: [0.00, 0.42, 0.00], rot: [0, 40, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 2, color: "#9fb2b5"}
+      - {shape: sphere, at: [0.20, 0.42, -0.18], rot: [0, 80, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 3, color: "#9fb2b5"}
+      - {shape: sphere, at: [-0.20, 0.47, 0.00], rot: [0, 120, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 4, color: "#9fb2b5"}
+      - {shape: sphere, at: [0.00, 0.47, -0.18], rot: [0, 160, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 5, color: "#9fb2b5"}
+      - {shape: sphere, at: [0.20, 0.47, 0.00], rot: [0, 200, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 6, color: "#9fb2b5"}
+      - {shape: sphere, at: [-0.20, 0.52, -0.18], rot: [0, 240, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 7, color: "#9fb2b5"}
+      - {shape: sphere, at: [0.00, 0.52, 0.00], rot: [0, 280, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 8, color: "#9fb2b5"}
+      - {shape: sphere, at: [0.20, 0.52, -0.18], rot: [0, 320, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 9, color: "#9fb2b5"}
+  - name: 少し
+    parts:
+      - {shape: cylinder, at: [0, 0, 0], radius: 0.36, top: 0.46, height: 0.5, sides: 14, color: "#a07a45"}
+      - {shape: cylinder, at: [0, 0.47, 0], radius: 0.47, top: 0.47, height: 0.05, sides: 14, color: "#7d5d33"}
+      - {shape: cylinder, at: [0, 0.02, 0], radius: 0.37, top: 0.37, height: 0.42, sides: 14, color: "#3a2a18"}
+      - {shape: sphere, at: [-0.20, 0.1, -0.18], rot: [0, 0, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 1, color: "#9fb2b5"}
+      - {shape: sphere, at: [0.00, 0.1, 0.00], rot: [0, 40, 90], scale: [0.07, 0.11, 0.24], detail: 1, jitter: 0.03, seed: 2, color: "#9fb2b5"}
+  - name: 空
+    parts:
+      - {shape: cylinder, at: [0, 0, 0], radius: 0.36, top: 0.46, height: 0.5, sides: 14, color: "#a07a45"}
+      - {shape: cylinder, at: [0, 0.47, 0], radius: 0.47, top: 0.47, height: 0.05, sides: 14, color: "#7d5d33"}
+      - {shape: cylinder, at: [0, 0.02, 0], radius: 0.37, top: 0.37, height: 0.42, sides: 14, color: "#3a2a18"}

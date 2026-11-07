@@ -1,0 +1,40 @@
+id: net
+kind: 小物
+name: 網
+tags: [漁具]
+states:
+  - name: 広げた
+    parts:
+      - {shape: box, at: [-1.20, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [-0.90, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [-0.60, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [-0.30, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [0.00, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [0.30, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [0.60, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [0.90, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [1.20, 0.03, 0], size: [0.025, 0.025, 1.8], color: "#6e5a3e"}
+      - {shape: box, at: [0, 0.03, -0.90], size: [2.4, 0.025, 0.025], color: "#6e5a3e"}
+      - {shape: box, at: [0, 0.03, -0.60], size: [2.4, 0.025, 0.025], color: "#6e5a3e"}
+      - {shape: box, at: [0, 0.03, -0.30], size: [2.4, 0.025, 0.025], color: "#6e5a3e"}
+      - {shape: box, at: [0, 0.03, -0.00], size: [2.4, 0.025, 0.025], color: "#6e5a3e"}
+      - {shape: box, at: [0, 0.03, 0.30], size: [2.4, 0.025, 0.025], color: "#6e5a3e"}
+      - {shape: box, at: [0, 0.03, 0.60], size: [2.4, 0.025, 0.025], color: "#6e5a3e"}
+      - {shape: box, at: [0, 0.03, 0.90], size: [2.4, 0.025, 0.025], color: "#6e5a3e"}
+      - {shape: sphere, at: [-1.2, 0.07, 0.9], scale: [0.07, 0.07, 0.07], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [-0.6, 0.07, 0.9], scale: [0.07, 0.07, 0.07], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [0, 0.07, 0.9], scale: [0.07, 0.07, 0.07], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [0.6, 0.07, 0.9], scale: [0.07, 0.07, 0.07], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [1.2, 0.07, 0.9], scale: [0.07, 0.07, 0.07], detail: 1, color: "#d9862f"}
+  - name: たたんだ
+    parts:
+      - {shape: sphere, at: [0, 0.12, 0], scale: [0.55, 0.22, 0.42], detail: 2, jitter: 0.12, seed: 5, color: "#6e5a3e"}
+      - {shape: box, at: [0, 0.2, -0.30], rot: [0, 0, 0], size: [1.0, 0.02, 0.02], color: "#4f402b"}
+      - {shape: box, at: [0, 0.2, -0.18], rot: [0, 28, 0], size: [1.0, 0.02, 0.02], color: "#4f402b"}
+      - {shape: box, at: [0, 0.2, -0.06], rot: [0, 56, 0], size: [1.0, 0.02, 0.02], color: "#4f402b"}
+      - {shape: box, at: [0, 0.2, 0.06], rot: [0, 84, 0], size: [1.0, 0.02, 0.02], color: "#4f402b"}
+      - {shape: box, at: [0, 0.2, 0.18], rot: [0, 112, 0], size: [1.0, 0.02, 0.02], color: "#4f402b"}
+      - {shape: box, at: [0, 0.2, 0.30], rot: [0, 140, 0], size: [1.0, 0.02, 0.02], color: "#4f402b"}
+      - {shape: sphere, at: [-0.3, 0.3, 0.2], scale: [0.07, 0.07, 0.07], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [0.25, 0.3, -0.15], scale: [0.07, 0.07, 0.07], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [0.05, 0.3, 0.3], scale: [0.07, 0.07, 0.07], detail: 1, color: "#d9862f"}
