@@ -206,7 +206,8 @@ export class Renderer {
     const t=Math.min(time,script.duration),scene=sceneAt(script,t),sky=SKIES[scene.time],{eye,at}=cameraAt(scene,t),place=this.place(scene.place);
     this.setup(sky,eye,at,t,260);
     this.gl.depthMask(false); this.gl.uniform1f(this.u.uSky,1); this.gl.uniform3fv(this.u.uSkyTop,sky.top); this.draw("dome",translate(eye[0],eye[1],eye[2])); this.gl.uniform1f(this.u.uSky,0); this.gl.depthMask(true);
-    this.draw("sea",identity(),[1,1,1],.12);
+    const lv=scene.sea?lerp(scene.sea[0],scene.sea[1],ease((t-scene.start)/scene.seconds)):0;
+    this.draw("sea",translate(0,lv,0),[1,1,1],scene.storm?.45:.12);
     this.draw("place:"+place.id,identity());
     for(const name of scene.cast) this.actor(scene.looks[name],poseAt(scene,name,t),place.terrain);
     if(scene.crowd) this.crowdAt(scene.crowd,t,place.terrain);
@@ -219,7 +220,7 @@ function demoScene(verb:string,target:boolean):Scene{
   const actions=[{actor:"A",verb:verb as Scene["actions"][number]["verb"],target:target?"B":undefined,start:.2,end:2.4}];
   const mutual=verb.includes("引っ張り合う");
   if(mutual) actions.push({actor:"B",verb:actions[0].verb,target:"A",start:.2,end:2.4});
-  return {place:"",time:"昼",camera:"固定",cast:target?["A","B"]:["A"],positions:mutual?{A:[-.75,0],B:[.75,0]}:{},faces:{},flashback:false,labels:[],props:[],looks:{A:DEMO_A,B:DEMO_B},actions,narration:"",seconds:3.2,start:0};
+  return {place:"",time:"昼",camera:"固定",cast:target?["A","B"]:["A"],positions:mutual?{A:[-.75,0],B:[.75,0]}:{},faces:{},flashback:false,storm:false,hud:true,labels:[],props:[],looks:{A:DEMO_A,B:DEMO_B},actions,narration:"",seconds:3.2,start:0};
 }
 function bounds(d:Float32Array){ const min=[1e9,1e9,1e9],max=[-1e9,-1e9,-1e9]; for(let i=0;i<d.length;i+=6) for(let k=0;k<3;k++){ min[k]=Math.min(min[k],d[i+k]); max[k]=Math.max(max[k],d[i+k]); } return {center:[(min[0]+max[0])/2,(min[1]+max[1])/2,(min[2]+max[2])/2] as Vec3,size:Math.max(max[0]-min[0],max[1]-min[1],max[2]-min[2])}; }
 
@@ -229,6 +230,7 @@ export function drawSubtitle(canvas: HTMLCanvasElement, script: Script, time: nu
   c.clearRect(0,0,W,H);
   const font=SUBTITLE_FONT;
   c.textAlign="center"; c.lineJoin="round";
+  if(scene.storm){ c.fillStyle="rgba(8,14,24,.28)"; c.fillRect(0,0,W,H); c.strokeStyle="rgba(200,215,230,.45)"; c.lineWidth=W*.003; c.beginPath(); for(let i=0;i<140;i++){ const sx=((i*97.31+t*W*1.9)%(W*1.4))-W*.2,sy=((i*57.7%1)*H+i*13.1+t*H*2.6)%H; c.moveTo(sx,sy); c.lineTo(sx-W*.03,sy+H*.05); } c.stroke(); }
   if(scene.flashback){ c.fillStyle="rgba(120,84,36,.32)"; c.fillRect(0,0,W,H); const g=c.createRadialGradient(W/2,H/2,H*.28,W/2,H/2,H*.68); g.addColorStop(0,"rgba(20,10,0,0)"); g.addColorStop(1,"rgba(20,10,0,.55)"); c.fillStyle=g; c.fillRect(0,0,W,H); }
   c.lineJoin="round";
   for(const l of scene.labels){ const px=l.x*W,py=l.y*H,big=W*.07,small=W*.034; c.font=`700 ${big}px ${font}`; const w=c.measureText(l.text).width; c.font=`700 ${small}px ${font}`; const bw=Math.max(w,l.sub?c.measureText(l.sub).width:0)+W*.07,bh=l.sub?W*.15:W*.105; c.fillStyle="rgba(255,255,255,.88)"; c.strokeStyle="#1a1a1a"; c.lineWidth=W*.004; c.beginPath(); c.roundRect(px-bw/2,py-bh/2,bw,bh,W*.015); c.fill(); c.stroke(); c.textAlign="center"; c.fillStyle="#1a1a1a"; c.font=`700 ${big}px ${font}`; c.fillText(l.text,px,py+(l.sub?-W*.003:W*.025)); if(l.sub){ c.fillStyle="#0017c1"; c.font=`700 ${small}px ${font}`; c.fillText(l.sub,px,py+W*.052); } }
@@ -237,7 +239,7 @@ export function drawSubtitle(canvas: HTMLCanvasElement, script: Script, time: nu
   c.textAlign="left"; c.textBaseline="alphabetic";
   const rounded=(x:number,y:number,w:number,h:number,r:number,tail=false)=>{ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); if(tail){ const tx=x+46*u; c.lineTo(tx+24*u,y+h); c.lineTo(tx+12*u,y+h+15*u); c.lineTo(tx,y+h); } c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); };
   const pop=scene.population;
-  if(script.year!==undefined||pop!==undefined){
+  if(scene.hud&&(script.year!==undefined||pop!==undefined)){
     const year=script.year!==undefined?`島に来て${script.year}年目`:"",count=pop!==undefined?`${pop}人`:"";
     c.font=`700 ${29*u}px ${font}`;
     const pad=17*u,w1=year?c.measureText(year).width+pad*2:0,w2=count?c.measureText(count).width+pad*2:0,x=32*u,y=62*u,h=56*u,r=8*u;
