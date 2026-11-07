@@ -151,7 +151,7 @@ export class Renderer {
       this.actor(look,{...idlePose(),bust:true,x:at[0]+(c*lx+s*lz)*size,z:at[2]+(-s*lx+c*lz)*size,y:at[1]+(.02+bob)*size,yaw:yaw+Math.PI/2,slump:.3},null);
     }
   }
-  private crowdAt(c:NonNullable<Scene["crowd"]>,t:number,terrain:Terrain){
+  private crowdAt(c:NonNullable<Scene["crowd"]>,t:number,terrain:Terrain,local=t){
     const q=rng(c.seed),cloths:Vec3[]=PALETTES[c.palette??""]??[[.2,.5,.46],[.7,.34,.3],[.76,.6,.25],[.4,.36,.6],[.36,.56,.34],[.62,.44,.3],[.72,.68,.56]],hairs:Vec3[]=[[.14,.1,.08],[.3,.2,.11],[.55,.53,.48],[.1,.1,.13]];
     for(let i=0;i<c.count;i++){
       const a=q()*Math.PI*2,d=c.radius[0]+q()*(c.radius[1]-c.radius[0]),x=c.center[0]+Math.cos(a)*d,z=c.center[1]+Math.sin(a)*d,woman=q()<.5,phase=q()*6,height=.82+q()*.2;
@@ -166,7 +166,7 @@ export class Renderer {
       const look=this.villager(q,l.palette??c.palette);
       const pose:Pose={...idlePose(),x,z,yaw:l.face};
       if(c.tug){ const w=Math.sin(t*7+phase); pose.armR=pose.armL=-1.5; pose.hold=true; pose.lean=.25+w*.1; pose.legSwing=w*.25; }
-      const fallAt=l.fallAt??c.fallAt; if(fallAt!==undefined){ pose.fall=ease((t-fallAt-n*.05)/.35); if(pose.fall>0){ pose.armR=pose.armL=0; pose.hold=false; pose.lean=0; } }
+      const fallAt=l.fallAt??c.fallAt; if(fallAt!==undefined){ pose.fall=ease((local-fallAt-n*.05)/.35); if(pose.fall>0){ pose.armR=pose.armL=0; pose.hold=false; pose.lean=0; } }
       n++; this.actor(look,pose,terrain);
     }
   }
@@ -210,7 +210,7 @@ export class Renderer {
     this.draw("sea",translate(0,lv,0),[1,1,1],scene.storm?.45:.12);
     this.draw("place:"+place.id,identity());
     for(const name of scene.cast) this.actor(scene.looks[name],poseAt(scene,name,t),place.terrain);
-    if(scene.crowd) this.crowdAt(scene.crowd,t,place.terrain);
+    if(scene.crowd) this.crowdAt(scene.crowd,t,place.terrain,t-scene.start);
     for(const p of scene.props) this.prop(p,scene,t);
   }
 }
@@ -265,8 +265,8 @@ export function drawSubtitle(canvas: HTMLCanvasElement, script: Script, time: nu
   const tags=scene.speaker?characterByName(scene.speaker)?.tags??[]:[];
   const village=tags.includes("はま村")?"#0b7a6e":tags.includes("もり村")?"#7a3fa6":null;
   const who=scene.speaker??"歴史家の記録",whoSize=21*u,lh=size*1.42,h=15*u+whoSize*1.35+lh*lines.length+12*u,y=H*.6;
-  rounded(x,y,boxW,h,8*u,!!scene.speaker); c.fillStyle=paper; c.fill(); c.lineWidth=(village?3.5:2)*u; c.strokeStyle=village??ink; c.stroke();
+  rounded(x,y,boxW,h,8*u,!!scene.speaker); c.fillStyle=paper; c.fill(); c.lineWidth=2*u; c.strokeStyle=ink; c.stroke();
   c.font=`700 ${whoSize}px ${font}`; c.fillStyle=village??key; c.fillText(who,x+pad,y+15*u+whoSize);
   c.font=`700 ${size}px ${font}`;
-  lines.forEach((line,i)=>{ let px=x+pad; const py=y+15*u+whoSize*1.35+lh*i+size*1.08; for(const run of line){ c.fillStyle=run.strong?key:ink; c.fillText(run.text,px,py); px+=c.measureText(run.text).width; } });
+  lines.forEach((line,i)=>{ let px=x+pad; const py=y+15*u+whoSize*1.35+lh*i+size*1.08; for(const run of line){ const w=c.measureText(run.text).width; c.fillStyle=village??(run.strong?key:ink); c.fillText(run.text,px,py); if(village&&run.strong) c.fillRect(px,py+5*u,w,3*u); px+=w; } });
 }
