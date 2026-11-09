@@ -3,8 +3,11 @@
  * APIキーはここ(Cloudflare の秘密の設定)にだけ置き、ブラウザには渡さない。
  * - Gemini 3.8 TTS(engine=gemini): GEMINI_API_KEY
  * - Chirp 3: HD(engine なし): GOOGLE_TTS_KEY
+ * 声の割り当てと読み方の設定(/api/settings)は、Cloudflare D1(DB)に、人物ごと・文ごとの行として保存する。
  */
-interface Env { ASSETS: { fetch(request: Request): Promise<Response> }; GOOGLE_TTS_KEY?: string; GEMINI_API_KEY?: string }
+interface D1Stmt { bind(...values: unknown[]): D1Stmt; all<T = Record<string, unknown>>(): Promise<{ results: T[] }> }
+interface D1 { prepare(sql: string): D1Stmt; batch(statements: D1Stmt[]): Promise<unknown> }
+interface Env { ASSETS: { fetch(request: Request): Promise<Response> }; GOOGLE_TTS_KEY?: string; GEMINI_API_KEY?: string; DB?: D1 }
 
 const CHIRP = /^ja-JP-Chirp3-HD-[A-Za-z]+$/, GEMINI = /^(?:[A-Za-z]+|voice_[A-Za-z0-9_-]+)$/, MAX_CHARS = 300;
 const MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"];
@@ -15,10 +18,11 @@ const fromBase64 = (s: string) => Uint8Array.from(atob(s), c => c.charCodeAt(0))
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname !== "/api/tts") return env.ASSETS.fetch(request);
-    if (request.method !== "GET") return reply(405, "GETで呼んでください。");
+    if (url.pathname !== "/api/tts" && url.pathname !== "/api/settings") return env.ASSETS.fetch(request);
     // Cloudflare Access を通ったリクエストにだけ付く印。ない場合は、他人に使われないよう断る
     if (!request.headers.get("Cf-Access-Jwt-Assertion")) return reply(403, "Cloudflare Access でログインした状態で使ってください。");
+    if (url.pathname === "/api/settings") return settings(request, env);
+    if (request.method !== "GET") return reply(405, "GETで呼んでください。");
     const q = url.searchParams, text = q.get("text") ?? "", voice = q.get("voice") ?? "";
     if (!text.trim() || [...text].length > MAX_CHARS) return reply(400, `読み上げる文は1〜${MAX_CHARS}文字にしてください。`);
     return q.get("engine") === "gemini" ? gemini(q, text, voice, env) : chirp(q, text, voice, env);
@@ -74,4 +78,71 @@ async function chirp(q: URLSearchParams, text: string, voice: string, env: Env) 
   const { audioContent } = await res.json() as { audioContent?: string };
   if (!audioContent) return reply(502, "Google の音声合成から音声が返りませんでした。");
   return audio(fromBase64(audioContent), "audio/mpeg");
+}
+
+const NARRATOR = "__narrator__", MAX_BODY = 512 * 1024, MAX_CHANGES = 2000;
+const str = (v: unknown, max: number) => typeof v === "string" && [...v].length <= max;
+const int = (v: unknown, lo: number, hi: number) => Number.isInteger(v) && (v as number) >= lo && (v as number) <= hi;
+const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
+
+let schema: Promise<unknown> | null = null;
+/** 表がなければ作る。Worker が起動して最初の1回だけ。 */
+const ensureSchema = (db: D1) => schema ??= db.batch([
+  db.prepare("CREATE TABLE IF NOT EXISTS voices (who TEXT PRIMARY KEY, voice TEXT NOT NULL, style TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL)"),
+  db.prepare("CREATE TABLE IF NOT EXISTS spots (line TEXT PRIMARY KEY, spots TEXT NOT NULL, updated_at TEXT NOT NULL)"),
+]).catch(e => { schema = null; throw e; });
+
+/** 保存済みの設定をまとめて返す。一度も保存していなければ null。 */
+async function readAll(db: D1) {
+  const voices = (await db.prepare("SELECT who, voice, style FROM voices").all<{ who: string; voice: string; style: string }>()).results;
+  const spots = (await db.prepare("SELECT line, spots FROM spots").all<{ line: string; spots: string }>()).results;
+  const narrator = voices.find(v => v.who === NARRATOR);
+  if (!narrator) return null;
+  return {
+    narrator: { voice: narrator.voice, style: narrator.style },
+    characters: Object.fromEntries(voices.filter(v => v.who !== NARRATOR).map(v => [v.who, { voice: v.voice, style: v.style }])),
+    spots: Object.fromEntries(spots.map(r => { try { return [r.line, JSON.parse(r.spots)]; } catch { return [r.line, []]; } })),
+  };
+}
+
+/**
+ * 声の割り当てと読み方。GET で全部を読み、PUT で変わった行だけを書く。
+ * PUT の本文: { narrator: {voice, style}, characters: {人物: {voice, style} | null}, spots: {文: [{start, length, to}] | null} }
+ * null はその行を消す(声なら「読み上げない」、読み方なら元に戻す)。書いていない行はそのまま残る。
+ */
+async function settings(request: Request, env: Env) {
+  if (!env.DB) return reply(500, "Cloudflare に設定の保存先(D1 の DB)がありません。README の手順で作ってください。");
+  const db = env.DB;
+  try { await ensureSchema(db); } catch (e) { return reply(500, "D1 の表を用意できませんでした: " + (e as Error).message); }
+  if (request.method === "GET") return json(await readAll(db));
+  if (request.method !== "PUT") return reply(405, "GET か PUT で呼んでください。");
+  const text = await request.text();
+  if (text.length > MAX_BODY) return reply(400, "設定が大きすぎます。");
+  let s: any;
+  try { s = JSON.parse(text); } catch { return reply(400, "設定を読めませんでした(JSON ではありません)。"); }
+  const entry = (e: any) => e && typeof e === "object" && typeof e.voice === "string" && GEMINI.test(e.voice) && str(e.style ?? "", 300);
+  if (!s || typeof s !== "object" || !entry(s.narrator)) return reply(400, "語りの声が正しくありません。");
+  const chars = s.characters ?? {}, spots = s.spots ?? {};
+  if (typeof chars !== "object" || Array.isArray(chars) || typeof spots !== "object" || Array.isArray(spots)) return reply(400, "設定の形が正しくありません。");
+  if (Object.keys(chars).length + Object.keys(spots).length > MAX_CHANGES) return reply(400, "一度に変える行が多すぎます。");
+  const now = new Date().toISOString(), batch: D1Stmt[] = [];
+  const putVoice = (who: string, e: any) => db.prepare("INSERT INTO voices (who, voice, style, updated_at) VALUES (?1, ?2, ?3, ?4) ON CONFLICT(who) DO UPDATE SET voice = ?2, style = ?3, updated_at = ?4").bind(who, e.voice, e.style ?? "", now);
+  batch.push(putVoice(NARRATOR, s.narrator));
+  for (const [who, e] of Object.entries(chars)) {
+    if (!str(who, 40) || !who || who === NARRATOR) return reply(400, "人物の名前が正しくありません。");
+    if (e === null) batch.push(db.prepare("DELETE FROM voices WHERE who = ?1").bind(who));
+    else if (entry(e)) batch.push(putVoice(who, e));
+    else return reply(400, `${who}の声が正しくありません。`);
+  }
+  for (const [line, list] of Object.entries(spots)) {
+    const n = [...line].length;
+    if (!n || n > 300) return reply(400, "読み方の文が正しくありません。");
+    if (list === null) { batch.push(db.prepare("DELETE FROM spots WHERE line = ?1").bind(line)); continue; }
+    if (!Array.isArray(list) || !list.length || list.length > 50) return reply(400, `「${line.slice(0, 20)}」の読み方が正しくありません。`);
+    for (const x of list as any[]) if (!x || !int(x.start, 0, n - 1) || !int(x.length, 1, 50) || x.start + x.length > n || !str(x.to, 50) || !x.to) return reply(400, `「${line.slice(0, 20)}」の読み方が正しくありません。`);
+    const clean = (list as any[]).map(x => ({ start: x.start, length: x.length, to: x.to }));
+    batch.push(db.prepare("INSERT INTO spots (line, spots, updated_at) VALUES (?1, ?2, ?3) ON CONFLICT(line) DO UPDATE SET spots = ?2, updated_at = ?3").bind(line, JSON.stringify(clean), now));
+  }
+  await db.batch(batch); // まとめて1つの処理として書く。途中で失敗したら何も書かれない
+  return json(await readAll(db));
 }

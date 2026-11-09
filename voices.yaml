@@ -1,30 +1,33 @@
-# 読み上げの声
-# engine を gemini か chirp に書き換えると、使う音声合成が切り替わる。
-# 設定を変えると、次に再生するときに作り直す(作った音声はブラウザに保存され、同じ文と設定なら二度は作らない)。
+# 読み上げの設定
+# 声の割り当てと読み方は、サイトの「音声一覧」「読み方」タブで編集し、Cloudflare に保存する。
+# ここに書いた narrator、characters、readings は、まだ一度も保存していないときの初期値。
+# 設定を変えると、変わった文だけ作り直す(作った音声はブラウザに保存され、同じ文と設定なら二度は作らない)。
+
+# 使う音声合成。gemini か chirp
 engine: gemini
 
 # Gemini 3.8 Flash TTS(Gemini API、有料。キーは Cloudflare の GEMINI_API_KEY)
 gemini:
   model: gemini-3.8-flash-tts
-  # 歴史家の語り(speaker のないカット)。声の名前(Alnilam など)か、Voice design で作った voice_… の ID
-  narrator: Alnilam
-  # 話し方の指示。短いほど声が安定する
-  style: Narration
   # ばらつきの大きさ(0〜2)。消すとモデルの標準(1)。
   # 低すぎると無音や失敗が起きるという報告があり、Google は標準のままを勧めている。
   # 無音の音声は自動で弾くので、試しに下げてよい
   temperature: 0.5
-  # セリフの声。ここに書いた人物だけセリフを読み上げる。書かない人物のセリフは字幕のみ
-  characters:
-    # イサオ: Orus
 
-# Chirp 3: HD(Google Cloud TTS、毎月100万字まで無料。キーは Cloudflare の GOOGLE_TTS_KEY)
+# Chirp 3: HD(Google Cloud TTS、毎月100万字まで無料。キーは Cloudflare の GOOGLE_TTS_KEY)。
+# 声の名前は Gemini と共通(Alnilam なら ja-JP-Chirp3-HD-Alnilam を使う)。話し方の指示(style)は使われない
 chirp:
-  narrator: ja-JP-Chirp3-HD-Charon
   # 読む速さ。1.0 が標準
   rate: 1.0
-  characters:
-    # イサオ: ja-JP-Chirp3-HD-Orus
-    # タケゾウ: ja-JP-Chirp3-HD-Fenrir
-    # ゲンタ: ja-JP-Chirp3-HD-Puck
-    # ハナ: ja-JP-Chirp3-HD-Kore
+
+# 歴史家の語り(speaker のないカット)
+narrator: {voice: Alnilam, style: Narration}
+
+# セリフの声。ここにある人物だけセリフを読み上げる。ない人物のセリフは字幕のみ
+characters: {}
+
+# 読み方。文ごとに、読みを変えた箇所を書く(サイトの「読み方」タブで編集する)。
+# 文は字幕の飾り([ ]、「」、改行)を除いたもの。start は何文字目か(0から数える)、length は文字数
+spots:
+  漁師の長、イサオ。: [{start: 3, length: 1, to: おさ}]
+  木こりの長、タケゾウ。: [{start: 4, length: 1, to: おさ}]

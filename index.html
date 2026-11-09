@@ -11,6 +11,8 @@
 <nav class="tabs" aria-label="画面の切り替え">
   <a id="tab-video" href="#video">映像</a>
   <a id="tab-assets" href="#assets">素材一覧</a>
+  <a id="tab-voices" href="#voices">音声一覧</a>
+  <a id="tab-readings" href="#readings">読み方</a>
 </nav>
 <main class="app" id="view-video">
   <section class="stage">
@@ -23,6 +25,14 @@
       <input id="seek" type="range" min="0" max="1" step="0.01" value="0" aria-label="再生位置">
       <output id="clock">0.0秒</output>
       <label class="check" for="voice"><input id="voice" type="checkbox" checked> 音声</label>
+    </div>
+    <div class="voice-status" id="voice-status" role="status" hidden>
+      <span class="spinner" aria-hidden="true"></span>
+      <div class="vs-body">
+        <div class="vs-head"><strong id="vs-title">音声を作成中</strong><output id="vs-count"></output></div>
+        <div class="vs-bar" aria-hidden="true"><i id="vs-fill"></i></div>
+        <p id="vs-now"></p>
+      </div>
     </div>
     <div class="transport">
       <button id="export" type="button">MP4を書き出す</button>
@@ -57,6 +67,28 @@
   </div>
   <pre class="asset-errors" id="asset-errors" hidden></pre>
   <div id="asset-grid"></div>
+</main>
+<main class="pages" id="view-voices" hidden>
+  <div class="savebar"><p class="save-state"></p><button class="plain revert" type="button">変更を取り消す</button><button class="save" type="button">保存</button></div>
+  <header class="page-head">
+    <h1>音声一覧</h1>
+    <p>語りと人物ごとに、声と話し方を選びます。保存すると、映像タブの読み上げに使われます。声を変えた人物の文だけ、次に再生するときに作り直します。</p>
+    <p class="engine-note"></p>
+  </header>
+  <div id="voice-rows" class="voice-rows"></div>
+</main>
+<main class="pages" id="view-readings" hidden>
+  <div class="savebar"><p class="save-state"></p><button class="plain revert" type="button">変更を取り消す</button><button class="save" type="button">保存</button></div>
+  <header class="page-head">
+    <h1>読み方</h1>
+    <p>字幕を時間の順に並べています。読みを変えたいところをクリックしてください(ドラッグで範囲も選べます)。変わるのはその箇所だけで、ほかの文や同じ漢字は変わりません。字幕もそのままです。</p>
+  </header>
+  <div class="read-filters">
+    <label class="lab" for="read-episode">話 <select id="read-episode"></select></label>
+    <label class="check" for="read-changed"><input id="read-changed" type="checkbox"> 読みを変えた文だけ</label>
+    <output id="read-count"></output>
+  </div>
+  <ol id="read-lines" class="read-lines"></ol>
 </main>
 <dialog id="asset-dialog" aria-labelledby="asset-title">
   <header><div><h2 id="asset-title"></h2><p id="asset-info"></p></div><button id="asset-close" class="plain" type="button">閉じる</button></header>
