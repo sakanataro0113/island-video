@@ -1,0 +1,13 @@
+id: wood_island
+kind: 場所
+name: 木こりの島
+tags: [故郷, 木こり, 第1話]
+# 森の深い山の島。中央の山から南の海へ、大きな川が流れる。木こりの家は川沿いに並ぶ
+terrain: {center_z: -50, radius: 46, peak: 16, river: {x: 0, to_z: 99, width: 2.2, wiggle: 4}}
+items:
+  - {asset: boat, state: 材木, at: [3, 0, 2.6], scale: 1.2}
+  - {asset: boat, state: 材木, at: [-4, 0, 4], scale: 1.2}
+scatter:
+  - {asset: house_mori, count: 80, seed: 41, ring: [8, 36], scale: [0.7, 0.9], spacing: 2.4}
+  - {asset: pine, count: 900, seed: 42, ring: [2, 45], scale: [1.0, 1.7], spacing: 0.9}
+  - {asset: bush, count: 120, seed: 43, ring: [2, 44], scale: [0.8, 1.4], spacing: 0.7}

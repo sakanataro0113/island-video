@@ -67,6 +67,8 @@ export function poseAt(scene: Scene, name: string, t: number): Pose {
 
 type View = { eye: Vec3; at: Vec3; up: Vec3; fov: number };
 const DEFAULT_FOV = .72;
+/** 画面を斜めに分けるときの線の位置(左端と右端の、上からの高さの割合)。 */
+export const SPLIT: [number, number] = [.58, .42];
 /** 点の列を、角を丸めた曲線にする(Catmull-Rom)。 */
 function spline(pts: Vec3[], u: number): Vec3 {
   const n = pts.length - 1, f = Math.min(n - 1e-6, Math.max(0, u * n)), i = Math.floor(f), k = f - i;
@@ -140,7 +142,7 @@ export class Renderer {
   private add!: (name: string, d: Float32Array) => void;
   triangles(name: string) { return (this.meshes[name]?.count ?? 0) / 3; }
   constructor(canvas: HTMLCanvasElement) {
-    const gl = canvas.getContext("webgl2", { antialias:true, preserveDrawingBuffer:true, alpha:false });
+    const gl = canvas.getContext("webgl2", { antialias:true, preserveDrawingBuffer:true, alpha:false, stencil:true });
     if (!gl) throw new Error("このブラウザではWebGL2を使えません。");
     this.gl = gl;
     const sh = (type: number, src: string) => { const s=gl.createShader(type)!; gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)??"shader"); return s; };
@@ -183,9 +185,9 @@ export class Renderer {
       part(0,.6,0,.34,.22,.34,[cloth[0]*.55,cloth[1]*.55,cloth[2]*.55],head); }
     const eyes:Vec3=[.07,.06,.06]; part(-.1,.24,.215,.06,.06,.02,eyes,head); part(.1,.24,.215,.06,.06,.02,eyes,head);
   }
-  private setup(sky:Sky,eye:Vec3,at:Vec3,t:number,far:number,clear:Vec3=sky.sky,fogFar=120,up:Vec3=[0,1,0],fov=DEFAULT_FOV){
+  private setup(sky:Sky,eye:Vec3,at:Vec3,t:number,far:number,clear:Vec3=sky.sky,fogFar=120,up:Vec3=[0,1,0],fov=DEFAULT_FOV,wipe=true){
     const g=this.gl,c=g.canvas as HTMLCanvasElement; g.viewport(0,0,c.width,c.height);
-    g.clearColor(clear[0],clear[1],clear[2],1); g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
+    if(wipe){ g.clearColor(clear[0],clear[1],clear[2],1); g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT); }
     g.uniformMatrix4fv(this.u.uVP,false,chain(perspective(fov,c.width/c.height,.25,far),lookAt(eye,at,up)));
     g.uniform1f(this.u.uTime,t); g.uniform3fv(this.u.uSun,normV(sky.sun)); g.uniform3fv(this.u.uSunCol,sky.sunCol); g.uniform3fv(this.u.uAmb,sky.amb); g.uniform3fv(this.u.uFog,clear); g.uniform3fv(this.u.uEye,eye); g.uniform1f(this.u.uFogFar,fogFar);
   }
@@ -253,8 +255,25 @@ export class Renderer {
     this.draw(key,identity());
   }
   render(script:Script,time:number){
-    const t=Math.min(time,script.duration),scene=sceneAt(script,t),sky=SKIES[scene.time],{eye,at,up,fov}=cameraAt(scene,t),place=this.place(scene.place);
-    const big=place.terrain.radius>45; this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120,up,fov);
+    const t=Math.min(time,script.duration),scene=sceneAt(script,t);
+    if(!scene.split){ this.view(scene,t,true); return; }
+    // 画面を斜めに上下に分ける。上は scene、下は scene.split。下側の形を型(ステンシル)に描いてから、それぞれを描く
+    const g=this.gl;
+    this.view(scene,t,true);
+    g.enable(g.STENCIL_TEST); g.clearStencil(0); g.clear(g.STENCIL_BUFFER_BIT);
+    g.stencilFunc(g.ALWAYS,1,0xff); g.stencilOp(g.KEEP,g.KEEP,g.REPLACE); g.colorMask(false,false,false,false); g.depthMask(false); g.disable(g.DEPTH_TEST);
+    this.splitMask();
+    g.colorMask(true,true,true,true); g.depthMask(true); g.enable(g.DEPTH_TEST);
+    g.stencilFunc(g.EQUAL,1,0xff); g.stencilOp(g.KEEP,g.KEEP,g.KEEP);
+    this.view(scene.split,t,false);
+    g.disable(g.STENCIL_TEST);
+  }
+  /** 1つの場面を描く。clear が false のときは色を消さずに重ねる(画面を分けた下側用)。 */
+  private view(scene:Scene,t:number,clear:boolean){
+    const sky=SKIES[scene.time],{eye,at,up,fov}=cameraAt(scene,t),place=this.place(scene.place);
+    const big=place.terrain.radius>45;
+    if(clear) this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120,up,fov);
+    else { const g=this.gl; g.clear(g.DEPTH_BUFFER_BIT); this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120,up,fov,false); }
     this.gl.depthMask(false); this.gl.uniform1f(this.u.uSky,1); this.gl.uniform3fv(this.u.uSkyTop,sky.top); this.draw("dome",translate(eye[0],eye[1],eye[2])); this.gl.uniform1f(this.u.uSky,0); this.gl.depthMask(true);
     const lv=scene.sea?lerp(scene.sea[0],scene.sea[1],ease((t-scene.start)/scene.seconds)):0;
     this.draw("sea",translate(0,lv,0),[1,1,1],scene.storm?.45:.12);
@@ -262,6 +281,21 @@ export class Renderer {
     for(const name of scene.cast) this.actor(scene.looks[name],poseAt(scene,name,t),place.terrain);
     if(scene.crowd) this.crowdAt(scene.crowd,t,place.terrain,t-scene.start);
     for(const p of scene.props) this.prop(p,scene,t);
+  }
+  private maskProg:WebGLProgram|null=null; private maskBuf:WebGLBuffer|null=null;
+  /** 画面の下側(左は高さの58%、右は42%を結ぶ斜めの線より下)を塗る。 */
+  private splitMask(){
+    const g=this.gl;
+    if(!this.maskProg){
+      const sh=(type:number,src:string)=>{ const x=g.createShader(type)!; g.shaderSource(x,src); g.compileShader(x); return x; };
+      const p=g.createProgram()!; g.attachShader(p,sh(g.VERTEX_SHADER,"#version 300 es\nin vec2 p;void main(){gl_Position=vec4(p,0.,1.);}")); g.attachShader(p,sh(g.FRAGMENT_SHADER,"#version 300 es\nprecision mediump float;out vec4 o;void main(){o=vec4(1.);}")); g.linkProgram(p); this.maskProg=p;
+      this.maskBuf=g.createBuffer(); g.bindBuffer(g.ARRAY_BUFFER,this.maskBuf); g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,1-2*SPLIT[0],1,1-2*SPLIT[1],1,-1, -1,1-2*SPLIT[0],1,-1,-1,-1]),g.STATIC_DRAW);
+    }
+    const prev=g.getParameter(g.CURRENT_PROGRAM),vao=g.getParameter(g.VERTEX_ARRAY_BINDING);
+    g.bindVertexArray(null); g.useProgram(this.maskProg); g.bindBuffer(g.ARRAY_BUFFER,this.maskBuf);
+    const loc=g.getAttribLocation(this.maskProg!,"p"); g.enableVertexAttribArray(loc); g.vertexAttribPointer(loc,2,g.FLOAT,false,0,0);
+    g.drawArrays(g.TRIANGLES,0,6); g.disableVertexAttribArray(loc);
+    g.useProgram(prev); g.bindVertexArray(vao);
   }
 }
 
@@ -283,6 +317,7 @@ export function drawSubtitle(canvas: HTMLCanvasElement, script: Script, time: nu
   if(scene.storm){ c.fillStyle="rgba(8,14,24,.28)"; c.fillRect(0,0,W,H); c.strokeStyle="rgba(200,215,230,.45)"; c.lineWidth=W*.003; c.beginPath(); for(let i=0;i<140;i++){ const sx=((i*97.31+t*W*1.9)%(W*1.4))-W*.2,sy=((i*57.7%1)*H+i*13.1+t*H*2.6)%H; c.moveTo(sx,sy); c.lineTo(sx-W*.03,sy+H*.05); } c.stroke(); }
   if(scene.flashback){ c.fillStyle="rgba(120,84,36,.32)"; c.fillRect(0,0,W,H); const g=c.createRadialGradient(W/2,H/2,H*.28,W/2,H/2,H*.68); g.addColorStop(0,"rgba(20,10,0,0)"); g.addColorStop(1,"rgba(20,10,0,.55)"); c.fillStyle=g; c.fillRect(0,0,W,H); }
   c.lineJoin="round";
+  if(scene.split){ c.save(); c.lineCap="butt"; c.strokeStyle="rgba(0,0,0,.45)"; c.lineWidth=W*.02; c.beginPath(); c.moveTo(-W*.05,H*SPLIT[0]+W*.0005); c.lineTo(W*1.05,H*SPLIT[1]); c.stroke(); c.strokeStyle="#fff"; c.lineWidth=W*.011; c.beginPath(); c.moveTo(-W*.05,H*SPLIT[0]); c.lineTo(W*1.05,H*SPLIT[1]); c.stroke(); c.restore(); }
   for(const l of scene.labels){ const px=l.x*W,py=l.y*H,big=W*.07,small=W*.034; c.font=`700 ${big}px ${font}`; const w=c.measureText(l.text).width; c.font=`700 ${small}px ${font}`; const bw=Math.max(w,l.sub?c.measureText(l.sub).width:0)+W*.07,bh=l.sub?W*.15:W*.105; c.fillStyle="rgba(255,255,255,.88)"; c.strokeStyle="#1a1a1a"; c.lineWidth=W*.004; c.beginPath(); c.roundRect(px-bw/2,py-bh/2,bw,bh,W*.015); c.fill(); c.stroke(); c.textAlign="center"; c.fillStyle="#1a1a1a"; c.font=`700 ${big}px ${font}`; c.fillText(l.text,px,py+(l.sub?-W*.003:W*.025)); if(l.sub){ c.fillStyle="#0017c1"; c.font=`700 ${small}px ${font}`; c.fillText(l.sub,px,py+W*.052); } }
   if(scene.caption){ const cu=W/533; c.font=`700 ${24*cu}px ${font}`; const w=c.measureText(scene.caption).width+28*cu,x=32*cu,y=130*cu,h=44*cu; c.fillStyle="#0017c1"; c.beginPath(); c.roundRect(x,y,w,h,8*cu); c.fill(); c.fillStyle="#fff"; c.textAlign="left"; c.fillText(scene.caption,x+14*cu,y+h*.7); c.textAlign="center"; }
   const u=W/533,ink="#1a1a1a",key="#0017c1",paper="rgba(255,255,255,.7)";

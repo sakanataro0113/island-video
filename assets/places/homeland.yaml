@@ -1,14 +1,14 @@
 id: homeland
 kind: 場所
-name: 海の向こうの故郷
-tags: [故郷, 第1話]
+name: 漁師の島の村
+tags: [故郷, 漁師, 第1話]
 terrain: {center_z: -13, radius: 16}
 items:
   - {asset: pier, at: [9.4, 0, 0.9]}
   - {asset: boat, at: [7.2, 0, 3.8]}
   - {asset: boat, at: [5.8, 0, 3.2]}
-  - {asset: rock, at: [-8.6, 0.02, 1.6], scale: 1.1}
-  - {asset: rock, at: [-7.6, 0.02, 3.2], scale: 0.7}
+  - {asset: rack, at: [-7.3, 0, -0.5], ground: true, state: 空}
+  - {asset: boat, at: [-6.4, 0, 3.6]}
   - {asset: rock, at: [3.4, 0.02, 4.1], scale: 0.4}
   - {asset: hut, at: [5.8, 0, -1.8], ground: true, scale: 0.72, rot: -15}
   - {asset: hut, at: [9, 0, -2.2], ground: true, scale: 0.72, rot: 10}
@@ -16,12 +16,12 @@ items:
   - {asset: hut, at: [5.2, 0, -5.2], ground: true, scale: 0.72, rot: -5}
   - {asset: hut, at: [8.6, 0, -5.8], ground: true, scale: 0.72, rot: 5}
   - {asset: hut, at: [12, 0, -7], ground: true, scale: 0.72, rot: 25}
-  - {asset: house_mori, at: [-5.6, 0, -3.4], ground: true, scale: 0.72, rot: 15}
-  - {asset: house_mori, at: [-8.8, 0, -3], ground: true, scale: 0.72, rot: -10}
-  - {asset: house_mori, at: [-11.6, 0, -4.8], ground: true, scale: 0.72, rot: -20}
-  - {asset: house_mori, at: [-5, 0, -7], ground: true, scale: 0.72, rot: 10}
-  - {asset: house_mori, at: [-8.6, 0, -7.2], ground: true, scale: 0.72, rot: -5}
-  - {asset: house_mori, at: [-12, 0, -8.8], ground: true, scale: 0.72, rot: -20}
+  - {asset: hut, at: [-5.6, 0, -3.4], ground: true, scale: 0.72, rot: 15}
+  - {asset: hut, at: [-8.8, 0, -3], ground: true, scale: 0.72, rot: -10}
+  - {asset: hut, at: [-11.6, 0, -4.8], ground: true, scale: 0.72, rot: -20}
+  - {asset: hut, at: [-5, 0, -7], ground: true, scale: 0.72, rot: 10}
+  - {asset: hut, at: [-8.6, 0, -7.2], ground: true, scale: 0.72, rot: -5}
+  - {asset: hut, at: [-12, 0, -8.8], ground: true, scale: 0.72, rot: -20}
 scatter:
   - {asset: pine, count: 75, seed: 7, ring: [1, 15], scale: [0.8, 1.35]}
   - {asset: bush, count: 26, seed: 21, ring: [1, 14], scale: [0.7, 1.3]}

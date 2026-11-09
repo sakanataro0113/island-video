@@ -38,7 +38,9 @@ export function terrainHeight(terrain: Terrain, x: number, z: number): number {
   const r = terrain.river;
   if (r) {
     const bed = -0.35, slope = 1.1;
-    if (z <= r.toZ) h = Math.min(h, bed + Math.max(0, Math.abs(x - riverX(r, z)) - r.width)*slope);
+    // 海に近づくほど川幅を広げる(河口)
+    const wide = r.width*(1 + Math.min(1, Math.max(0, (z - (terrain.centerZ + terrain.radius*.55))/(terrain.radius*.45)))*.8);
+    if (z <= r.toZ) h = Math.min(h, bed + Math.max(0, Math.abs(x - riverX(r, z)) - wide)*slope);
     else h = Math.min(h, bed + Math.max(0, Math.hypot(x - riverX(r, r.toZ), (z - r.toZ)*1.6) - r.width)*slope);
     if (r.lagoon > 0) h = Math.min(h, bed + Math.max(0, Math.hypot(x - riverX(r, r.toZ), z - r.toZ) - r.lagoon)*slope);
   }

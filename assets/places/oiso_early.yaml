@@ -2,8 +2,8 @@ id: oiso_early
 kind: 場所
 name: 開拓前の大浜
 tags: [はま村, もり村, 海岸, 1年目]
-# 南の浜(z = 2 あたり)の位置は変えずに、島を広げた。中央に山、島を南北に裂くさけ川。川の南の端は浜の手前の池で止まり、浜は地続き
-terrain: {center_z: -31, radius: 34, peak: 4, river: {x: 0, to_z: -7, width: 1.1, wiggle: 1.4, lagoon: 2.4}}
+# 南の浜(z = 2 あたり)の位置は変えずに、島を広げた。中央に山。さけ川は山から南へ流れ、大浜の真ん中で海に注ぐ(河口は浅く、歩いて渡れる)
+terrain: {center_z: -31, radius: 34, peak: 4, river: {x: -0.7, to_z: 99, width: 1.0, wiggle: 1.0}}
 items:
   - {asset: rock, at: [11.2, 0.02, 1.8], scale: 1.1}
   - {asset: rock, at: [12.8, 0.02, 3.4], scale: 0.7}

@@ -1,7 +1,7 @@
 id: big_island
 kind: 場所
-name: 海の向こうの大きな島
-tags: [故郷, 第1話]
+name: 漁師の島
+tags: [故郷, 漁師, 第1話]
 terrain: {center_z: -50, radius: 52}
 items:
   - {asset: tower, at: [0, 0, -50], ground: true, scale: 1.6}
@@ -18,7 +18,7 @@ items:
   - {asset: boat, at: [2, 0, 5]}
 scatter:
   - {asset: hut, count: 120, seed: 31, ring: [4, 46], scale: [0.7, 0.9], spacing: 2.6}
-  - {asset: house_mori, count: 90, seed: 32, ring: [10, 44], scale: [0.7, 0.9], spacing: 2.6}
+  - {asset: hut, count: 90, seed: 32, ring: [10, 44], scale: [0.7, 0.9], spacing: 2.6}
   - {asset: rack, count: 30, seed: 33, ring: [30, 48], scale: [0.9, 1.1], spacing: 1.6}
   - {asset: pine, count: 260, seed: 34, ring: [2, 50], scale: [0.9, 1.5], spacing: 1}
   - {asset: bush, count: 80, seed: 35, ring: [2, 50], scale: [0.8, 1.4], spacing: 0.7}

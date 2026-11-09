@@ -1,0 +1,6 @@
+id: open_sea
+kind: 場所
+name: 大海原
+tags: [海, 漂流]
+# 陸が見えない海の上。島ははるか遠くに置いて、見えないようにする
+terrain: {center_z: -9000, radius: 1}
