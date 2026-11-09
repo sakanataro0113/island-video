@@ -7,6 +7,8 @@ import yaml from "js-yaml";
 import { VoicePlayer, mixVoices, prepareVoices, voiceErrors, type Progress } from "./voice";
 import { loadSettings, onSettingsChange } from "./settings";
 import { VoicePages, type Line } from "./voice-pages";
+import { SubtitleEditor } from "./subtitle-editor";
+import { fontString, loadStyle, onStyleChange, style } from "./subtitle-style";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const gl = $<HTMLCanvasElement>("gl"), overlay = $<HTMLCanvasElement>("overlay"), text = $<HTMLTextAreaElement>("text");
@@ -115,8 +117,8 @@ let abort: AbortController | null = null, result: ExportResult | null = null, re
 
 async function subtitleFontReady(): Promise<boolean> {
   const chars = script.title + script.scenes.map(s => s.narration).join("");
-  try { await document.fonts.load(`700 40px "Noto Sans JP"`, chars); } catch { return false; }
-  return [...document.fonts].some(f => f.family.includes("Noto Sans JP") && f.status === "loaded");
+  try { await Promise.all([document.fonts.load(`700 40px "Noto Sans JP"`, chars), document.fonts.load(fontString(40), chars)]); } catch { return false; }
+  return [...document.fonts].some(f => f.family.replace(/"/g, "") === style.font && f.status === "loaded");
 }
 exportBtn.onclick = async () => {
   if (abort) { abort.abort(); return; }
@@ -190,4 +192,8 @@ if (voiceErrors.length) say(voiceErrors.join("\n"), true);
 // 声や読み方を保存したら、映像タブの台本を読み直す(変わった文だけ作り直す)
 onSettingsChange(() => { settingsReady = true; if (!renderer) return; setPlaying(false); voiceNote = ""; apply(); });
 function say_errors() { return "読み込めなかった素材があります:\n" + catalog.errors.join("\n"); }
+// 字幕の見た目: 変えたらプレビューを描き直す。保存済みの見た目を読み込む
+const subEditor = new SubtitleEditor($("frame"), () => setPlaying(false));
+onStyleChange(() => { if (renderer && script) show(time); document.fonts?.load(fontString(40), "小さな島").then(() => { if (renderer && script) show(time); }).catch(() => {}); });
+void loadStyle().then(note => subEditor.loaded(note));
 (window as any).__sim = { show, get script() { return script; }, get gallery() { return gallery; }, catalog };

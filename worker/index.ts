@@ -18,10 +18,11 @@ const fromBase64 = (s: string) => Uint8Array.from(atob(s), c => c.charCodeAt(0))
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname !== "/api/tts" && url.pathname !== "/api/settings") return env.ASSETS.fetch(request);
+    if (url.pathname !== "/api/tts" && url.pathname !== "/api/settings" && url.pathname !== "/api/subtitle") return env.ASSETS.fetch(request);
     // Cloudflare Access を通ったリクエストにだけ付く印。ない場合は、他人に使われないよう断る
     if (!request.headers.get("Cf-Access-Jwt-Assertion")) return reply(403, "Cloudflare Access でログインした状態で使ってください。");
     if (url.pathname === "/api/settings") return settings(request, env);
+    if (url.pathname === "/api/subtitle") return subtitle(request, env);
     if (request.method !== "GET") return reply(405, "GETで呼んでください。");
     const q = url.searchParams, text = q.get("text") ?? "", voice = q.get("voice") ?? "";
     if (!text.trim() || [...text].length > MAX_CHARS) return reply(400, `読み上げる文は1〜${MAX_CHARS}文字にしてください。`);
@@ -90,6 +91,7 @@ let schema: Promise<unknown> | null = null;
 const ensureSchema = (db: D1) => schema ??= db.batch([
   db.prepare("CREATE TABLE IF NOT EXISTS voices (who TEXT PRIMARY KEY, voice TEXT NOT NULL, style TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL)"),
   db.prepare("CREATE TABLE IF NOT EXISTS spots (line TEXT PRIMARY KEY, spots TEXT NOT NULL, updated_at TEXT NOT NULL)"),
+  db.prepare("CREATE TABLE IF NOT EXISTS prefs (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)"),
 ]).catch(e => { schema = null; throw e; });
 
 /** 保存済みの設定をまとめて返す。一度も保存していなければ null。 */
@@ -145,4 +147,26 @@ async function settings(request: Request, env: Env) {
   }
   await db.batch(batch); // まとめて1つの処理として書く。途中で失敗したら何も書かれない
   return json(await readAll(db));
+}
+
+/**
+ * 字幕の見た目。GET で読み、PUT で置き換える。中身の細かい確かめはブラウザ側(cleanStyle)で行い、ここでは形と大きさだけ見る。
+ */
+async function subtitle(request: Request, env: Env) {
+  if (!env.DB) return reply(500, "Cloudflare に設定の保存先(D1 の DB)がありません。README の手順で作ってください。");
+  const db = env.DB;
+  try { await ensureSchema(db); } catch (e) { return reply(500, "D1 の表を用意できませんでした: " + (e as Error).message); }
+  if (request.method === "GET") {
+    const row = (await db.prepare("SELECT value FROM prefs WHERE key = 'subtitle'").all<{ value: string }>()).results[0];
+    try { return json(row ? JSON.parse(row.value) : null); } catch { return json(null); }
+  }
+  if (request.method !== "PUT") return reply(405, "GET か PUT で呼んでください。");
+  const text = await request.text();
+  if (text.length > 4096) return reply(400, "字幕の設定が大きすぎます。");
+  let s: unknown;
+  try { s = JSON.parse(text); } catch { return reply(400, "字幕の設定を読めませんでした(JSON ではありません)。"); }
+  if (!s || typeof s !== "object" || Array.isArray(s)) return reply(400, "字幕の設定の形が正しくありません。");
+  for (const v of Object.values(s)) if (!["string", "number", "boolean"].includes(typeof v) || (typeof v === "string" && v.length > 60)) return reply(400, "字幕の設定の値が正しくありません。");
+  await db.batch([db.prepare("INSERT INTO prefs (key, value, updated_at) VALUES ('subtitle', ?1, ?2) ON CONFLICT(key) DO UPDATE SET value = ?1, updated_at = ?2").bind(JSON.stringify(s), new Date().toISOString())]);
+  return json(s);
 }

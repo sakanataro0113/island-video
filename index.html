@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>小さな島の年代記 シミュレータ</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@800&display=swap">
 <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
@@ -47,6 +47,12 @@
       <label class="file" for="file">台本を読み込む<input id="file" type="file" accept=".yaml,.yml,.txt"></label>
       <button id="apply" type="button">台本を反映</button>
     </div>
+    <details id="sub-editor" class="sub-editor">
+      <summary>字幕の見た目</summary>
+      <p class="hint">変えるとすぐプレビューに出ます。開いている間は、プレビューの上をドラッグすると字幕の位置が動きます。</p>
+      <div id="sub-fields" class="sub-fields"></div>
+      <div class="sub-actions"><p id="sub-state" class="hint"></p><button class="plain" id="sub-default" type="button">初期値に戻す</button><button class="plain" id="sub-revert" type="button">変更を取り消す</button><button id="sub-save" type="button">保存</button></div>
+    </details>
     <label class="lab" for="text">台本</label>
     <textarea id="text" spellcheck="false"></textarea>
     <p class="message" id="message" role="status"></p>

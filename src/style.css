@@ -121,3 +121,20 @@ button.small{font-size:12px;padding:4px 10px}
 .rl-edit select{flex:none;max-width:45%}
 @media (max-width:640px){.rl-edit{grid-template-columns:minmax(0,1fr)}}
 .read-lines .empty{color:var(--muted);padding:8px}
+
+/* 字幕の見た目の編集 */
+.sub-editor{background:var(--panel);border:1px solid var(--rule);padding:8px 12px}
+.sub-editor summary{cursor:pointer;font-weight:700;font-size:14px}
+.sub-editor[open] summary{margin-bottom:6px}
+.sub-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 14px;margin-top:6px}
+.sub-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;min-width:0}
+.sub-row .lab{grid-column:1/-1}
+.sub-row select{grid-column:1/-1;min-width:0;width:100%}
+.sub-row input[type="range"]{width:100%;accent-color:var(--accent)}
+.sub-row input[type="color"]{width:44px;height:28px;padding:0;border:1px solid var(--rule);background:none}
+.sub-row output{font-size:12px;min-width:0;text-align:right;white-space:nowrap}
+.sub-check{display:flex;gap:6px;align-items:center;font-size:13px}
+.sub-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.sub-actions .hint{flex:1;min-width:10em}
+.frame.dragging-subtitle #overlay{cursor:move;outline:2px dashed var(--accent);outline-offset:-2px}
+@media (max-width:640px){.sub-fields{grid-template-columns:minmax(0,1fr)}}

@@ -2,8 +2,7 @@ title: 第1話 二隻の舟と一つの約束
 year: 1
 population: 38
 scenes:
-  - {"place": "開拓前の大浜", "time": "夕方", "cast": [], "camera": {"path": [{"at": [6, 1.2, 46]}, {"at": [-2, 0.8, 32]}, {"at": [2.5, 0.9, 18]}, {"at": [-0.5, 1.2, 7]}, {"at": [0, 3, 1]}, {"at": [0.5, 8.5, -5]}, {"at": [-1, 11, -12]}], "fov": 82, "bank": 25}, "narration": "この島は、\n[200年]で滅びた。", "seconds": 3.0, "hud": false}
-  - {"place": "開拓前の大浜", "time": "夕方", "cast": [], "camera": {"path": [{"at": [-1, 11, -12]}, {"at": [-3, 13, -20]}, {"at": [2, 17, -30]}, {"at": [12, 24, -26], "look": [0, 0, -13]}, {"at": [16, 30, -8], "look": [0, 0, -13]}], "fov": 78, "bank": 30}, "narration": "最後に残ったのは、\nたった一人。", "seconds": 3.0, "hud": false}
+  - {"place": "開拓前の大浜", "time": "夕方", "cast": [], "camera": {"orbit": {"center": [0, 0, -11], "radius": 30, "height": 24, "start": 160, "turns": 1, "look": [0, 0, -11]}}, "narration": "この島は、[200年]で滅びた。\n最後に残ったのは、たった一人。", "seconds": 6.0, "hud": false}
   - {"place": "開拓前の大浜", "time": "朝", "cast": [], "camera": {"from": [0, 1.45, 3.1], "to": [0, 1.42, 2.8], "look": [0, 1.12, 0.25]}, "narration": "始まりは、\n一匹の魚だった。", "seconds": 2.6, "props": [{"asset": "fish_half", "state": "頭側", "yaw": 1.57, "path": [{"t": 0.38, "at": [0, 1.12, 0.25]}, {"t": 1.75, "at": [0.13, 1.12, 0.25]}]}, {"asset": "fish_half", "state": "尾側", "yaw": 1.57, "path": [{"t": 0.38, "at": [0, 1.12, 0.25]}, {"t": 1.75, "at": [-0.13, 1.12, 0.25]}]}]}
   - {"place": "海の向こうの大きな島", "time": "昼", "cast": [], "camera": {"orbit": {"center": [0, 0, -50], "radius": 100, "height": 115, "start": 20, "turns": 1, "look": [0, 0, -50]}}, "narration": "海の向こうの、大きな島。", "seconds": 4.6, "hud": false}
   - {"place": "海の向こうの大きな島", "time": "夜", "cast": [], "camera": {"from": [-20, 85, 70], "to": [-14, 70, 56], "look": [0, 0, -46]}, "narration": "ある嵐の夜。", "seconds": 2.66, "storm": true, "sea": [0, 0.5], "hud": false}
