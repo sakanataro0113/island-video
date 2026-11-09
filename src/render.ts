@@ -1,7 +1,7 @@
 import { catalog, characterByName, looksOf, placeByName, type Asset, type Look, type ModelAsset, type PlaceAsset } from "./assets";
 import { buildBlob, buildCube, buildDome, buildSkirt, buildModel, buildPlace, buildSea, terrainHeight, type Terrain } from "./mesh";
 import { chain, rng, clamp01, ease, identity, lerp, lookAt, perspective, rotX, rotY, scale, translate, type Mat4, type Vec3 } from "./math";
-import { sceneAt, type Prop, type Scene, type Script } from "./script";
+import { sceneAt, type CameraPath, type Prop, type Scene, type Script } from "./script";
 import { TIMES } from "./vocab";
 
 const VS = `#version 300 es
@@ -63,11 +63,59 @@ export function poseAt(scene: Scene, name: string, t: number): Pose {
   return pose;
 }
 
-function cameraAt(scene: Scene, t: number): { eye: Vec3; at: Vec3 } {
-  const p = ease((t-scene.start)/scene.seconds);
+type View = { eye: Vec3; at: Vec3; up: Vec3; fov: number };
+const DEFAULT_FOV = .72;
+/** 点の列を、角を丸めた曲線にする(Catmull-Rom)。 */
+function spline(pts: Vec3[], u: number): Vec3 {
+  const n = pts.length - 1, f = Math.min(n - 1e-6, Math.max(0, u * n)), i = Math.floor(f), k = f - i;
+  const p0 = pts[Math.max(0, i-1)]!, p1 = pts[i]!, p2 = pts[i+1]!, p3 = pts[Math.min(n, i+2)]!;
+  return [0,1,2].map(d => .5*((2*p1[d]!) + (-p0[d]!+p2[d]!)*k + (2*p0[d]!-5*p1[d]!+4*p2[d]!-p3[d]!)*k*k + (-p0[d]!+3*p1[d]!-3*p2[d]!+p3[d]!)*k*k*k)) as Vec3;
+}
+const pathCache = new WeakMap<object, { u: number[]; s: number[] }>();
+/** 道のりの割合 s(0〜1)から、曲線の位置 u を求める。一定の速さで飛ぶため。 */
+function arcU(c: CameraPath, s: number) {
+  let tab = pathCache.get(c);
+  if (!tab) {
+    const pts = c.points.map(q => q.at), N = 240, u: number[] = [0], d: number[] = [0];
+    let prev = spline(pts, 0);
+    for (let i = 1; i <= N; i++) { const q = spline(pts, i/N); d.push(d[i-1]! + Math.hypot(q[0]-prev[0], q[1]-prev[1], q[2]-prev[2])); u.push(i/N); prev = q; }
+    tab = { u, s: d.map(x => x / (d[N] || 1)) }; pathCache.set(c, tab);
+  }
+  const i = Math.max(0, tab.s.findIndex(x => x >= s) - 1), a = tab.s[i]!, b = tab.s[i+1] ?? 1;
+  return lerp(tab.u[i]!, tab.u[i+1] ?? 1, b > a ? (s - a) / (b - a) : 0);
+}
+const yawOf = (a: Vec3, b: Vec3) => Math.atan2(b[0]-a[0], b[2]-a[2]);
+function pathView(c: CameraPath, p: number): View {
+  const pts = c.points.map(q => q.at), u = arcU(c, Math.min(1, Math.max(0, p)));
+  const eye = spline(pts, u), du = .012, ahead = spline(pts, Math.min(1, u + du)), behind = spline(pts, Math.max(0, u - du));
+  const dir = norm3([ahead[0]-behind[0], ahead[1]-behind[1], ahead[2]-behind[2]]);
+  // 点に look があれば、その点の近くではそこを見る。なければ進む向きを見る
+  const n = pts.length - 1, f = u * n, i = Math.min(n - 1, Math.floor(f)), k = f - i;
+  // 進む向きを見る。ただし上り下りで空や地面ばかり映らないよう、上下の角度を抑えて少し下を向ける
+  const flat = Math.hypot(dir[0], dir[2]) || 1, pitch = Math.max(-.6, Math.min(.2, Math.asin(dir[1]))) - .1;
+  const ahead10: Vec3 = [eye[0] + dir[0]/flat*Math.cos(pitch)*10, eye[1] + Math.sin(pitch)*10, eye[2] + dir[2]/flat*Math.cos(pitch)*10];
+  const target = (j: number): Vec3 => c.points[j]!.look ?? ahead10;
+  const t0 = target(i), t1 = target(i+1), w = ease(k);
+  const at: Vec3 = [lerp(t0[0],t1[0],w), lerp(t0[1],t1[1],w), lerp(t0[2],t1[2],w)];
+  // 曲がる速さに応じて傾ける(左に曲がれば左に傾く)
+  let turn = yawOf(eye, ahead) - yawOf(behind, eye); turn = Math.atan2(Math.sin(turn), Math.cos(turn));
+  const roll = Math.max(-1, Math.min(1, turn * 6)) * c.bank * Math.PI / 180;
+  const fwd = norm3([at[0]-eye[0], at[1]-eye[1], at[2]-eye[2]]), right = norm3([fwd[2], 0, -fwd[0]]);
+  const up: Vec3 = [right[0]*Math.sin(roll), Math.cos(roll), right[2]*Math.sin(roll)];
+  return { eye, at, up, fov: c.fov * Math.PI / 180 };
+}
+function norm3(v: Vec3): Vec3 { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0]/l, v[1]/l, v[2]/l]; }
+
+function cameraAt(scene: Scene, t: number): View {
+  const raw = Math.min(1, Math.max(0, (t-scene.start)/scene.seconds)), p = ease(raw);
+  if (typeof scene.camera === "object" && scene.camera.kind === "path") return pathView(scene.camera, raw);
+  if (typeof scene.camera === "object" && scene.camera.kind === "orbit") {
+    const c = scene.camera, a = (c.start + c.turns * 360 * raw) * Math.PI / 180;
+    return { eye: [c.center[0] + Math.sin(a)*c.radius, c.height, c.center[2] + Math.cos(a)*c.radius], at: c.look, up: [0,1,0], fov: (c.fov ?? DEFAULT_FOV*180/Math.PI) * Math.PI / 180 };
+  }
   if (typeof scene.camera === "object") {
     const c = scene.camera, mix = (a: Vec3, b: Vec3): Vec3 => [lerp(a[0],b[0],p),lerp(a[1],b[1],p),lerp(a[2],b[2],p)];
-    return { eye: mix(c.from,c.to), at: mix(c.look,c.lookTo) };
+    return { eye: mix(c.from,c.to), at: mix(c.look,c.lookTo), up: [0,1,0], fov: c.fov !== undefined ? c.fov * Math.PI / 180 : DEFAULT_FOV };
   }
   let dist = 11, az = 0;
   if (scene.camera === "ゆっくり寄る") dist = lerp(14, 8, p);
@@ -75,7 +123,7 @@ function cameraAt(scene: Scene, t: number): { eye: Vec3; at: Vec3 } {
   if (scene.camera === "回り込む") az = lerp(-.55, .55, p);
   // 映っている人物の中心を追う。どの時刻でも位置は計算で決まる。
   const cx = scene.cast.reduce((sum, name) => { const q = poseAt(scene, name, t); return sum + q.x - Math.sign(Math.sin(q.yaw))*q.fall*.85; }, 0) / Math.max(1, scene.cast.length);
-  return { eye:[cx*.8+Math.sin(az)*dist, 1.4+dist*.14, Math.cos(az)*dist], at:[cx,1.0,0] };
+  return { eye:[cx*.8+Math.sin(az)*dist, 1.4+dist*.14, Math.cos(az)*dist], at:[cx,1.0,0], up:[0,1,0], fov:DEFAULT_FOV };
 }
 
 const PALETTES:Record<string,Vec3[]>={
@@ -133,10 +181,10 @@ export class Renderer {
       part(0,.6,0,.34,.22,.34,[cloth[0]*.55,cloth[1]*.55,cloth[2]*.55],head); }
     const eyes:Vec3=[.07,.06,.06]; part(-.1,.24,.215,.06,.06,.02,eyes,head); part(.1,.24,.215,.06,.06,.02,eyes,head);
   }
-  private setup(sky:Sky,eye:Vec3,at:Vec3,t:number,far:number,clear:Vec3=sky.sky,fogFar=120){
+  private setup(sky:Sky,eye:Vec3,at:Vec3,t:number,far:number,clear:Vec3=sky.sky,fogFar=120,up:Vec3=[0,1,0],fov=DEFAULT_FOV){
     const g=this.gl,c=g.canvas as HTMLCanvasElement; g.viewport(0,0,c.width,c.height);
     g.clearColor(clear[0],clear[1],clear[2],1); g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
-    g.uniformMatrix4fv(this.u.uVP,false,chain(perspective(.72,c.width/c.height,.25,far),lookAt(eye,at)));
+    g.uniformMatrix4fv(this.u.uVP,false,chain(perspective(fov,c.width/c.height,.25,far),lookAt(eye,at,up)));
     g.uniform1f(this.u.uTime,t); g.uniform3fv(this.u.uSun,normV(sky.sun)); g.uniform3fv(this.u.uSunCol,sky.sunCol); g.uniform3fv(this.u.uAmb,sky.amb); g.uniform3fv(this.u.uFog,clear); g.uniform3fv(this.u.uEye,eye); g.uniform1f(this.u.uFogFar,fogFar);
   }
   private villager(q:()=>number,palette?:string):Look{
@@ -203,8 +251,8 @@ export class Renderer {
     this.draw(key,identity());
   }
   render(script:Script,time:number){
-    const t=Math.min(time,script.duration),scene=sceneAt(script,t),sky=SKIES[scene.time],{eye,at}=cameraAt(scene,t),place=this.place(scene.place);
-    const big=place.terrain.radius>30; this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120);
+    const t=Math.min(time,script.duration),scene=sceneAt(script,t),sky=SKIES[scene.time],{eye,at,up,fov}=cameraAt(scene,t),place=this.place(scene.place);
+    const big=place.terrain.radius>30; this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120,up,fov);
     this.gl.depthMask(false); this.gl.uniform1f(this.u.uSky,1); this.gl.uniform3fv(this.u.uSkyTop,sky.top); this.draw("dome",translate(eye[0],eye[1],eye[2])); this.gl.uniform1f(this.u.uSky,0); this.gl.depthMask(true);
     const lv=scene.sea?lerp(scene.sea[0],scene.sea[1],ease((t-scene.start)/scene.seconds)):0;
     this.draw("sea",translate(0,lv,0),[1,1,1],scene.storm?.45:.12);

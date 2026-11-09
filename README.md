@@ -23,7 +23,13 @@
 
 ## 台本
 
-話ごとの台本は `episodes/` に置きます。カットごとに `positions`(人物の位置)、`camera`(from、to、look、look_to)、`props`(at、path、between)を指定できます。`actions` は `{do, from, to}` の形で秒を指定できます。`year` と `population` は画面上部に表示されます。
+話ごとの台本は `episodes/` に置きます。カットごとに `positions`(人物の位置)、`camera`(下の3通り)、`props`(at、path、between)を指定できます。`actions` は `{do, from, to}` の形で秒を指定できます。`year` と `population` は画面上部に表示されます。
+
+カメラ(`camera`)の書き方
+- `{from, to, look, look_to}`: from から to へ動きながら、look から look_to を見る
+- `{path: [{at}, {at}, …], fov: 80, bank: 25}`: FPV。点を順に一定の速さで飛び、進む向きを見て、曲がるときに傾く。点に `look` を書くと、その点ではそこを見る
+- `{orbit: {center, radius, height, start: 0, turns: 1, look}}`: center の周りを一定の速さで回る。`turns: 1` で360°
+- どれも `fov`(縦の画角、度)を書ける
 
 ## 読み上げ音声
 

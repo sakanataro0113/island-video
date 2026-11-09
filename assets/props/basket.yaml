@@ -229,9 +229,24 @@ states:
       - {shape: box, at: [-0.212, 0.550, 0.464], rot: [0.0, 335.5, 0.0], size: [0.160, 0.060, 0.050], color: "#6a4c2a"}
       - {shape: box, at: [-0.073, 0.550, 0.505], rot: [0.0, 351.8, 0.0], size: [0.160, 0.060, 0.050], color: "#6a4c2a"}
       - {shape: cylinder, at: [0, 0.02, 0], radius: 0.42, top: 0.42, height: 0.04, sides: 22, color: "#5c4329"}
-      - {shape: sphere, at: [-0.15, 0.10, -0.16], rot: [15, 339, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 1, color: "#8ea3a8"}
-      - {shape: sphere, at: [-0.13, 0.11, -0.09], rot: [17, 279, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 2, color: "#9fb2b5"}
-      - {shape: sphere, at: [-0.22, 0.12, -0.16], rot: [-19, 169, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 3, color: "#9fb2b5"}
+      - {shape: sphere, at: [-0.080, 0.075, -0.170], rot: [69.8, 0.9, 92.4], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [-0.088, 0.075, -0.150], rot: [69.8, 0.9, 92.4], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [-0.231, 0.068, -0.226], rot: [-20.2, 0.9, 92.4], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [-0.094, 0.076, -0.096], rot: [69.8, 0.9, 92.4], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [0.038, 0.132, -0.103], rot: [69.8, 0.9, 92.4], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.043, 0.030, -0.102], rot: [69.8, 0.9, 92.4], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.120, 0.075, -0.150], rot: [-108.2, 2.6, 97.8], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [0.127, 0.075, -0.171], rot: [-108.2, 2.6, 97.8], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.271, 0.098, -0.100], rot: [161.8, 2.6, 97.8], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.132, 0.073, -0.224], rot: [-108.2, 2.6, 97.8], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [-0.008, 0.106, -0.215], rot: [-108.2, 2.6, 97.8], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.006, 0.005, -0.211], rot: [-108.2, 2.6, 97.8], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.020, 0.130, -0.200], rot: [21.3, -9.2, 86.4], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [-0.000, 0.130, -0.192], rot: [21.3, -9.2, 86.4], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [-0.037, 0.158, -0.348], rot: [-68.7, -9.2, 86.4], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [-0.045, 0.128, -0.162], rot: [21.3, -9.2, 86.4], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [0.051, 0.157, -0.059], rot: [21.3, -9.2, 86.4], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.045, 0.056, -0.075], rot: [21.3, -9.2, 86.4], size: [0.015, 0.025, 0.025], color: "#111418"}
   - name: 満
     parts:
       - {shape: box, at: [0.000, 0.280, 0.460], rot: [8.0, 0.0, 0.0], size: [0.142, 0.500, 0.035], color: "#94713f"}
@@ -345,37 +360,189 @@ states:
       - {shape: box, at: [-0.212, 0.550, 0.464], rot: [0.0, 335.5, 0.0], size: [0.160, 0.060, 0.050], color: "#6a4c2a"}
       - {shape: box, at: [-0.073, 0.550, 0.505], rot: [0.0, 351.8, 0.0], size: [0.160, 0.060, 0.050], color: "#6a4c2a"}
       - {shape: cylinder, at: [0, 0.02, 0], radius: 0.42, top: 0.42, height: 0.04, sides: 22, color: "#5c4329"}
-      - {shape: sphere, at: [0.11, 0.14, -0.06], rot: [6, 26, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 1, color: "#8ea3a8"}
-      - {shape: sphere, at: [0.14, 0.14, 0.20], rot: [16, 77, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 2, color: "#9fb2b5"}
-      - {shape: sphere, at: [0.03, 0.14, -0.08], rot: [-16, 153, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 3, color: "#8ea3a8"}
-      - {shape: sphere, at: [0.11, 0.14, 0.11], rot: [5, 341, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 4, color: "#8ea3a8"}
-      - {shape: sphere, at: [-0.04, 0.14, -0.06], rot: [-11, 200, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 5, color: "#9fb2b5"}
-      - {shape: sphere, at: [0.12, 0.14, -0.03], rot: [-15, 111, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 6, color: "#8ea3a8"}
-      - {shape: sphere, at: [0.22, 0.14, 0.10], rot: [6, 134, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 7, color: "#8ea3a8"}
-      - {shape: sphere, at: [-0.23, 0.14, -0.06], rot: [5, 179, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 8, color: "#8ea3a8"}
-      - {shape: sphere, at: [0.08, 0.14, -0.16], rot: [3, 163, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 9, color: "#aebfc2"}
-      - {shape: sphere, at: [0.11, 0.25, 0.00], rot: [11, 29, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 10, color: "#aebfc2"}
-      - {shape: sphere, at: [-0.04, 0.25, -0.24], rot: [9, 104, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 11, color: "#9fb2b5"}
-      - {shape: sphere, at: [0.11, 0.25, 0.12], rot: [10, 55, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 12, color: "#aebfc2"}
-      - {shape: sphere, at: [0.12, 0.25, -0.22], rot: [-17, 201, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 13, color: "#aebfc2"}
-      - {shape: sphere, at: [0.13, 0.25, -0.08], rot: [-0, 287, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 14, color: "#9fb2b5"}
-      - {shape: sphere, at: [-0.21, 0.25, 0.13], rot: [-1, 239, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 15, color: "#9fb2b5"}
-      - {shape: sphere, at: [-0.14, 0.25, -0.02], rot: [3, 245, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 16, color: "#aebfc2"}
-      - {shape: sphere, at: [0.16, 0.25, -0.03], rot: [7, 8, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 17, color: "#aebfc2"}
-      - {shape: sphere, at: [0.16, 0.25, -0.12], rot: [-0, 79, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 18, color: "#aebfc2"}
-      - {shape: sphere, at: [0.07, 0.36, 0.07], rot: [-4, 314, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 19, color: "#9fb2b5"}
-      - {shape: sphere, at: [0.11, 0.36, 0.06], rot: [-9, 49, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 20, color: "#aebfc2"}
-      - {shape: sphere, at: [-0.08, 0.36, 0.07], rot: [-3, 129, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 21, color: "#aebfc2"}
-      - {shape: sphere, at: [-0.02, 0.36, 0.07], rot: [-13, 84, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 22, color: "#9fb2b5"}
-      - {shape: sphere, at: [0.01, 0.36, 0.18], rot: [-13, 101, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 23, color: "#9fb2b5"}
-      - {shape: sphere, at: [0.06, 0.36, -0.11], rot: [3, 343, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 24, color: "#8ea3a8"}
-      - {shape: sphere, at: [-0.15, 0.36, 0.12], rot: [6, 266, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 25, color: "#aebfc2"}
-      - {shape: sphere, at: [-0.10, 0.36, 0.14], rot: [15, 287, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 26, color: "#aebfc2"}
-      - {shape: sphere, at: [0.08, 0.36, -0.10], rot: [-1, 144, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 27, color: "#9fb2b5"}
-      - {shape: sphere, at: [0.03, 0.47, 0.06], rot: [-14, 122, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 28, color: "#9fb2b5"}
-      - {shape: sphere, at: [0.06, 0.47, 0.08], rot: [1, 342, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 29, color: "#8ea3a8"}
-      - {shape: sphere, at: [0.02, 0.47, 0.13], rot: [5, 53, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 30, color: "#aebfc2"}
-      - {shape: sphere, at: [-0.03, 0.47, 0.10], rot: [-1, 42, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 31, color: "#aebfc2"}
-      - {shape: sphere, at: [-0.00, 0.47, 0.10], rot: [-1, 31, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 32, color: "#9fb2b5"}
-      - {shape: sphere, at: [-0.12, 0.47, -0.00], rot: [-1, 249, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 33, color: "#8ea3a8"}
-      - {shape: sphere, at: [0.02, 0.47, 0.14], rot: [1, 53, 90], scale: [0.06, 0.1, 0.22], detail: 1, jitter: 0.03, seed: 34, color: "#8ea3a8"}
+      - {shape: sphere, at: [-0.165, 0.070, 0.039], rot: [-79.2, 1.1, -95.8], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#a3bac1"}
+      - {shape: sphere, at: [-0.161, 0.070, 0.018], rot: [-79.2, 1.1, -95.8], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [-0.323, 0.087, 0.009], rot: [-169.2, 1.1, -95.8], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [-0.139, 0.069, -0.032], rot: [-79.2, 1.1, -95.8], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [-0.033, 0.005, 0.042], rot: [-79.2, 1.1, -95.8], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.023, 0.107, 0.044], rot: [-79.2, 1.1, -95.8], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.117, 0.070, -0.124], rot: [142.2, 2.4, 88.2], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [-0.099, 0.070, -0.110], rot: [142.2, 2.4, 88.2], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: cone, at: [-0.215, 0.078, 0.004], rot: [52.2, 2.4, 88.2], radius: 0.0806, height: 0.124, sides: 6, color: "#48697a"}
+      - {shape: cone, at: [-0.050, 0.069, -0.088], rot: [142.2, 2.4, 88.2], radius: 0.031, height: 0.0744, sides: 5, color: "#48697a"}
+      - {shape: box, at: [-0.014, 0.114, -0.220], rot: [142.2, 2.4, 88.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.018, 0.012, -0.216], rot: [142.2, 2.4, 88.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.049, 0.070, -0.163], rot: [14.1, 2.3, 90.6], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#a3bac1"}
+      - {shape: sphere, at: [0.028, 0.070, -0.158], rot: [14.1, 2.3, 90.6], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [0.010, 0.063, -0.319], rot: [-75.9, 2.3, 90.6], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [-0.020, 0.071, -0.133], rot: [14.1, 2.3, 90.6], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [0.060, 0.126, -0.027], rot: [14.1, 2.3, 90.6], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.062, 0.025, -0.023], rot: [14.1, 2.3, 90.6], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.165, 0.070, -0.039], rot: [71.7, 0.6, 91.7], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [0.159, 0.070, -0.019], rot: [71.7, 0.6, 91.7], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.012, 0.065, -0.090], rot: [-18.3, 0.6, 91.7], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.154, 0.070, 0.035], rot: [71.7, 0.6, 91.7], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.286, 0.125, 0.024], rot: [71.7, 0.6, 91.7], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.290, 0.024, 0.025], rot: [71.7, 0.6, 91.7], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.117, 0.070, 0.124], rot: [129.7, -4.6, 95.6], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [0.131, 0.070, 0.140], rot: [129.7, -4.6, 95.6], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: cone, at: [-0.006, 0.050, 0.226], rot: [39.7, -4.6, 95.6], radius: 0.0806, height: 0.124, sides: 6, color: "#48697a"}
+      - {shape: cone, at: [0.174, 0.072, 0.173], rot: [129.7, -4.6, 95.6], radius: 0.031, height: 0.0744, sides: 5, color: "#48697a"}
+      - {shape: box, at: [0.229, 0.138, 0.058], rot: [129.7, -4.6, 95.6], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.239, 0.037, 0.049], rot: [129.7, -4.6, 95.6], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.049, 0.070, 0.163], rot: [9.4, 5.7, 90.9], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [-0.070, 0.070, 0.166], rot: [9.4, 5.7, 90.9], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: cone, at: [-0.075, 0.054, 0.005], rot: [-80.6, 5.7, 90.9], radius: 0.0806, height: 0.124, sides: 6, color: "#48697a"}
+      - {shape: cone, at: [-0.120, 0.071, 0.187], rot: [9.4, 5.7, 90.9], radius: 0.031, height: 0.0744, sides: 5, color: "#48697a"}
+      - {shape: box, at: [-0.049, 0.134, 0.295], rot: [9.4, 5.7, 90.9], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.047, 0.033, 0.305], rot: [9.4, 5.7, 90.9], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.160, 0.150, -0.003], rot: [81.6, -0.5, -93.7], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [-0.157, 0.150, 0.019], rot: [81.6, -0.5, -93.7], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [-0.001, 0.140, -0.026], rot: [-8.4, -0.5, -93.7], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [-0.161, 0.151, 0.073], rot: [81.6, -0.5, -93.7], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [-0.295, 0.108, 0.039], rot: [81.6, -0.5, -93.7], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.288, 0.210, 0.038], rot: [81.6, -0.5, -93.7], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.078, 0.150, -0.140], rot: [158.4, -5.9, 92.3], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [-0.057, 0.150, -0.132], rot: [158.4, -5.9, 92.3], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [-0.136, 0.132, 0.009], rot: [68.4, -5.9, 92.3], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [-0.004, 0.151, -0.124], rot: [158.4, -5.9, 92.3], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [-0.010, 0.216, -0.253], rot: [158.4, -5.9, 92.3], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.006, 0.115, -0.263], rot: [158.4, -5.9, 92.3], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.082, 0.150, -0.137], rot: [-27.0, -1.5, -89.2], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [0.102, 0.150, -0.147], rot: [-27.0, -1.5, -89.2], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.009, 0.145, -0.281], rot: [-117.0, -1.5, -89.2], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.154, 0.150, -0.160], rot: [-27.0, -1.5, -89.2], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.164, 0.103, -0.024], rot: [-27.0, -1.5, -89.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.163, 0.205, -0.027], rot: [-27.0, -1.5, -89.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.160, 0.150, 0.003], rot: [97.6, -0.8, -83.7], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#a3bac1"}
+      - {shape: sphere, at: [0.157, 0.150, 0.024], rot: [97.6, -0.8, -83.7], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [0.319, 0.168, 0.024], rot: [7.6, -0.8, -83.7], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [0.138, 0.149, 0.075], rot: [97.6, -0.8, -83.7], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [0.028, 0.084, 0.007], rot: [97.6, -0.8, -83.7], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.017, 0.185, 0.005], rot: [97.6, -0.8, -83.7], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.078, 0.150, 0.140], rot: [-154.3, 7.8, -86.2], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#adc2c7"}
+      - {shape: sphere, at: [0.058, 0.150, 0.131], rot: [-154.3, 7.8, -86.2], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.009, 0.126, 0.284], rot: [115.7, 7.8, -86.2], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.016, 0.152, 0.097], rot: [-154.3, 7.8, -86.2], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.119, 0.120, 0.002], rot: [-154.3, 7.8, -86.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.113, 0.221, 0.016], rot: [-154.3, 7.8, -86.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.082, 0.150, 0.137], rot: [-30.8, -5.4, -86.8], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [-0.064, 0.150, 0.126], rot: [-30.8, -5.4, -86.8], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [-0.164, 0.132, -0.001], rot: [-120.8, -5.4, -86.8], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [-0.012, 0.151, 0.110], rot: [-30.8, -5.4, -86.8], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [0.008, 0.114, 0.248], rot: [-30.8, -5.4, -86.8], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.002, 0.216, 0.238], rot: [-30.8, -5.4, -86.8], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.133, 0.230, -0.042], rot: [113.7, -3.9, -81.3], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#a3bac1"}
+      - {shape: sphere, at: [0.125, 0.230, -0.022], rot: [113.7, -3.9, -81.3], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [0.279, 0.257, 0.023], rot: [23.7, -3.9, -81.3], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [0.092, 0.228, 0.021], rot: [113.7, -3.9, -81.3], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [0.009, 0.157, -0.074], rot: [113.7, -3.9, -81.3], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.006, 0.258, -0.081], rot: [113.7, -3.9, -81.3], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.081, 0.230, 0.114], rot: [-141.2, 7.5, -84.0], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [0.064, 0.230, 0.100], rot: [-141.2, 7.5, -84.0], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [-0.017, 0.203, 0.238], rot: [128.8, 7.5, -84.0], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.031, 0.232, 0.058], rot: [-141.2, 7.5, -84.0], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.153, 0.203, -0.012], rot: [-141.2, 7.5, -84.0], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.143, 0.303, 0.002], rot: [-141.2, 7.5, -84.0], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.083, 0.230, 0.113], rot: [-146.0, -0.8, 89.5], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [-0.065, 0.230, 0.100], rot: [-146.0, -0.8, 89.5], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [0.007, 0.227, 0.246], rot: [124.0, -0.8, 89.5], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [-0.028, 0.230, 0.061], rot: [-146.0, -0.8, 89.5], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [-0.141, 0.283, -0.012], rot: [-146.0, -0.8, 89.5], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.142, 0.181, -0.013], rot: [-146.0, -0.8, 89.5], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.133, 0.230, -0.044], rot: [-62.6, 3.5, 83.2], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [-0.143, 0.230, -0.064], rot: [-62.6, 3.5, 83.2], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.009, 0.209, -0.118], rot: [-152.6, 3.5, 83.2], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [-0.178, 0.232, -0.105], rot: [-62.6, 3.5, 83.2], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [-0.257, 0.298, -0.004], rot: [-62.6, 3.5, 83.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.269, 0.198, 0.002], rot: [-62.6, 3.5, 83.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.001, 0.230, -0.140], rot: [2.7, 7.8, -89.6], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#adc2c7"}
+      - {shape: sphere, at: [0.023, 0.230, -0.139], rot: [2.7, 7.8, -89.6], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.009, 0.252, -0.300], rot: [-87.3, 7.8, -89.6], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.075, 0.228, -0.124], rot: [2.7, 7.8, -89.6], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.017, 0.161, -0.011], rot: [2.7, 7.8, -89.6], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.016, 0.262, 0.003], rot: [2.7, 7.8, -89.6], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.092, 0.310, 0.077], rot: [-121.9, -3.8, -96.1], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#a3bac1"}
+      - {shape: sphere, at: [0.080, 0.310, 0.059], rot: [-121.9, -3.8, -96.1], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [-0.043, 0.330, 0.162], rot: [148.1, -3.8, -96.1], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.063, 0.308, 0.007], rot: [-121.9, -3.8, -96.1], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.190, 0.242, -0.010], rot: [-121.9, -3.8, -96.1], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.201, 0.343, -0.017], rot: [-121.9, -3.8, -96.1], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.045, 0.310, 0.111], rot: [31.0, 5.0, 93.0], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#adc2c7"}
+      - {shape: sphere, at: [-0.063, 0.310, 0.122], rot: [31.0, 5.0, 93.0], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: cone, at: [-0.127, 0.294, -0.026], rot: [-59.0, 5.0, 93.0], radius: 0.0806, height: 0.124, sides: 6, color: "#48697a"}
+      - {shape: cone, at: [-0.102, 0.311, 0.160], rot: [31.0, 5.0, 93.0], radius: 0.031, height: 0.0744, sides: 5, color: "#48697a"}
+      - {shape: box, at: [0.003, 0.374, 0.234], rot: [31.0, 5.0, 93.0], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.009, 0.273, 0.243], rot: [31.0, 5.0, 93.0], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.120, 0.310, -0.008], rot: [-89.3, 0.0, 86.2], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#adc2c7"}
+      - {shape: sphere, at: [-0.120, 0.310, -0.030], rot: [-89.3, 0.0, 86.2], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.041, 0.299, -0.010], rot: [-179.3, 0.0, 86.2], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [-0.133, 0.311, -0.082], rot: [-89.3, 0.0, 86.2], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [-0.253, 0.370, -0.028], rot: [-89.3, 0.0, 86.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.259, 0.268, -0.028], rot: [-89.3, 0.0, 86.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.029, 0.310, -0.116], rot: [159.5, 2.4, 89.1], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#adc2c7"}
+      - {shape: sphere, at: [-0.009, 0.310, -0.109], rot: [159.5, 2.4, 89.1], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [-0.086, 0.317, 0.034], rot: [69.5, 2.4, 89.1], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.045, 0.309, -0.102], rot: [159.5, 2.4, 89.1], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.040, 0.355, -0.239], rot: [159.5, 2.4, 89.1], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.038, 0.253, -0.234], rot: [159.5, 2.4, 89.1], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.102, 0.310, -0.064], rot: [51.5, 5.2, 96.5], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [0.088, 0.310, -0.047], rot: [51.5, 5.2, 96.5], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: cone, at: [-0.023, 0.287, -0.164], rot: [-38.5, 5.2, 96.5], radius: 0.0806, height: 0.124, sides: 6, color: "#48697a"}
+      - {shape: cone, at: [0.065, 0.312, 0.002], rot: [51.5, 5.2, 96.5], radius: 0.031, height: 0.0744, sides: 5, color: "#48697a"}
+      - {shape: box, at: [0.187, 0.380, 0.033], rot: [51.5, 5.2, 96.5], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.199, 0.280, 0.042], rot: [51.5, 5.2, 96.5], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.046, 0.390, -0.089], rot: [-147.3, -5.5, -93.5], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [-0.064, 0.390, -0.101], rot: [-147.3, -5.5, -93.5], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [-0.132, 0.408, 0.046], rot: [122.7, -5.5, -93.5], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [-0.102, 0.389, -0.139], rot: [-147.3, -5.5, -93.5], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [0.006, 0.324, -0.210], rot: [-147.3, -5.5, -93.5], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.012, 0.425, -0.220], rot: [-147.3, -5.5, -93.5], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.089, 0.390, -0.046], rot: [61.5, -4.6, 81.6], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#a3bac1"}
+      - {shape: sphere, at: [0.078, 0.390, -0.027], rot: [61.5, -4.6, 81.6], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [-0.050, 0.417, -0.122], rot: [-28.5, -4.6, 81.6], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.064, 0.388, 0.025], rot: [61.5, -4.6, 81.6], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.204, 0.417, 0.042], rot: [61.5, -4.6, 81.6], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.189, 0.317, 0.034], rot: [61.5, -4.6, 81.6], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.046, 0.390, 0.089], rot: [-30.8, 6.4, 86.2], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [0.027, 0.390, 0.078], rot: [-30.8, 6.4, 86.2], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [0.127, 0.369, -0.049], rot: [-120.8, 6.4, 86.2], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [-0.024, 0.392, 0.062], rot: [-30.8, 6.4, 86.2], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [-0.038, 0.458, 0.189], rot: [-30.8, 6.4, 86.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.045, 0.357, 0.200], rot: [-30.8, 6.4, 86.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.089, 0.390, 0.046], rot: [109.2, 2.6, -97.4], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [-0.096, 0.390, 0.066], rot: [109.2, 2.6, -97.4], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.062, 0.368, 0.099], rot: [19.2, 2.6, -97.4], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [-0.125, 0.392, 0.112], rot: [109.2, 2.6, -97.4], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [-0.230, 0.358, 0.019], rot: [109.2, 2.6, -97.4], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.217, 0.459, 0.024], rot: [109.2, 2.6, -97.4], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.056, 0.470, 0.042], rot: [-45.8, -2.9, -87.1], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [-0.041, 0.470, 0.027], rot: [-45.8, -2.9, -87.1], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#52748a"}
+      - {shape: cone, at: [-0.171, 0.458, -0.070], rot: [-135.8, -2.9, -87.1], radius: 0.0806, height: 0.124, sides: 6, color: "#52748a"}
+      - {shape: cone, at: [0.005, 0.471, -0.002], rot: [-45.8, -2.9, -87.1], radius: 0.031, height: 0.0744, sides: 5, color: "#52748a"}
+      - {shape: box, at: [0.059, 0.429, 0.124], rot: [-45.8, -2.9, -87.1], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.054, 0.530, 0.119], rot: [-45.8, -2.9, -87.1], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.009, 0.470, -0.069], rot: [0.2, 9.2, -90.0], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#adc2c7"}
+      - {shape: sphere, at: [0.013, 0.470, -0.069], rot: [0.2, 9.2, -90.0], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [-0.008, 0.496, -0.229], rot: [-89.8, 9.2, -90.0], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [0.066, 0.468, -0.057], rot: [0.2, 9.2, -90.0], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [0.012, 0.398, 0.057], rot: [0.2, 9.2, -90.0], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.012, 0.498, 0.073], rot: [0.2, 9.2, -90.0], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.065, 0.470, 0.027], rot: [-108.2, 0.6, -88.2], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#97b0b8"}
+      - {shape: sphere, at: [0.058, 0.470, 0.006], rot: [-108.2, 0.6, -88.2], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: cone, at: [-0.088, 0.465, 0.077], rot: [161.8, 0.6, -88.2], radius: 0.0806, height: 0.124, sides: 6, color: "#48697a"}
+      - {shape: cone, at: [0.053, 0.470, -0.047], rot: [-108.2, 0.6, -88.2], radius: 0.031, height: 0.0744, sides: 5, color: "#48697a"}
+      - {shape: box, at: [0.189, 0.424, -0.037], rot: [-108.2, 0.6, -88.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [0.186, 0.525, -0.036], rot: [-108.2, 0.6, -88.2], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [-0.008, 0.540, -0.029], rot: [-17.3, -2.4, 90.8], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#8fa9b2"}
+      - {shape: sphere, at: [-0.028, 0.540, -0.035], rot: [-17.3, -2.4, 90.8], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#3d5e70"}
+      - {shape: cone, at: [0.040, 0.547, -0.183], rot: [-107.3, -2.4, 90.8], radius: 0.0806, height: 0.124, sides: 6, color: "#3d5e70"}
+      - {shape: cone, at: [-0.082, 0.539, -0.039], rot: [-17.3, -2.4, 90.8], radius: 0.031, height: 0.0744, sides: 5, color: "#3d5e70"}
+      - {shape: box, at: [-0.070, 0.585, 0.097], rot: [-17.3, -2.4, 90.8], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.068, 0.483, 0.093], rot: [-17.3, -2.4, 90.8], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: sphere, at: [0.008, 0.540, 0.029], rot: [21.3, -4.2, -91.7], scale: [0.056, 0.087, 0.198], detail: 2, jitter: 0.02, seed: 2, color: "#adc2c7"}
+      - {shape: sphere, at: [0.028, 0.540, 0.037], rot: [21.3, -4.2, -91.7], scale: [0.046, 0.068, 0.186], detail: 1, jitter: 0.01, seed: 4, color: "#48697a"}
+      - {shape: cone, at: [0.066, 0.527, -0.121], rot: [-68.7, -4.2, -91.7], radius: 0.0806, height: 0.124, sides: 6, color: "#48697a"}
+      - {shape: cone, at: [0.073, 0.541, 0.067], rot: [21.3, -4.2, -91.7], radius: 0.031, height: 0.0744, sides: 5, color: "#48697a"}
+      - {shape: box, at: [-0.023, 0.500, 0.167], rot: [21.3, -4.2, -91.7], size: [0.015, 0.025, 0.025], color: "#111418"}
+      - {shape: box, at: [-0.020, 0.602, 0.160], rot: [21.3, -4.2, -91.7], size: [0.015, 0.025, 0.025], color: "#111418"}

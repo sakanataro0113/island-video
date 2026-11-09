@@ -6,10 +6,16 @@ import { VOICE_LEAD, VOICE_TAIL, lengthOf, voiceOf, type Voice } from "./voice";
 export { CAMERAS, TIMES, VERBS };
 const TARGETED = new Set<string>(["詰め寄る", "殴る", "引っ張り合う", "激しく引っ張り合う"]);
 
-export type CameraMove = { from: [number, number, number]; to: [number, number, number]; look: [number, number, number]; lookTo: [number, number, number] };
+type V3 = [number, number, number];
+/** from から to へ動きながら、look から look_to を見る。fov は縦の画角(度)。 */
+export type CameraMove = { kind: "move"; from: V3; to: V3; look: V3; lookTo: V3; fov?: number };
+/** FPV: 点を順に、なめらかに一定の速さで飛ぶ。進む向きを見て、曲がるときに傾く(bank は最大の傾き、度)。点に look を書くと、そこではその位置を見る。 */
+export type CameraPath = { kind: "path"; points: { at: V3; look?: V3 }[]; fov: number; bank: number };
+/** center の周りを一定の速さで回る。turns: 1 で一周(360°)。start は開始の角度(度、0 は手前の +z 側)。 */
+export type CameraOrbit = { kind: "orbit"; center: V3; radius: number; height: number; start: number; turns: number; look: V3; fov?: number };
 export type Prop = { asset: string; state?: string; flap?: [string, string]; scale: number; facePath: boolean; yaw: number; between?: [string, string]; grow?: [number, number]; riders?: { count: number; seed: number; palette?: string }; height: number; path: { t: number; at: [number, number, number] }[] };
 export type Action = { actor: string; verb: (typeof VERBS)[number]; target?: string; start: number; end: number };
-export type Scene = { place: string; time: (typeof TIMES)[number]; camera: (typeof CAMERAS)[number] | CameraMove; cast: string[]; positions: Record<string, [number, number]>; faces: Record<string, number>; props: Prop[]; population?: number; flashback: boolean; caption?: string; speaker?: string; storm: boolean; sea?: [number, number]; hud: boolean; labels: { text: string; sub?: string; x: number; y: number }[]; crowd?: { count: number; seed: number; center: [number, number]; radius: [number, number]; cheer: boolean; lines: { from: [number, number]; to: [number, number]; count: number; face: number; palette?: string; fallAt?: number }[]; palette?: string; tug: boolean; fallAt?: number }; looks: Record<string, Look>; actions: Action[]; narration: string; voice?: Voice; seconds: number; start: number };
+export type Scene = { place: string; time: (typeof TIMES)[number]; camera: (typeof CAMERAS)[number] | CameraMove | CameraPath | CameraOrbit; cast: string[]; positions: Record<string, [number, number]>; faces: Record<string, number>; props: Prop[]; population?: number; flashback: boolean; caption?: string; speaker?: string; storm: boolean; sea?: [number, number]; hud: boolean; labels: { text: string; sub?: string; x: number; y: number }[]; crowd?: { count: number; seed: number; center: [number, number]; radius: [number, number]; cheer: boolean; lines: { from: [number, number]; to: [number, number]; count: number; face: number; palette?: string; fallAt?: number }[]; palette?: string; tug: boolean; fallAt?: number }; looks: Record<string, Look>; actions: Action[]; narration: string; voice?: Voice; seconds: number; start: number };
 export type Script = { title: string; year?: number; population?: number; scenes: Scene[]; duration: number };
 
 const includes = <T extends string>(list: readonly T[], v: unknown): v is T => list.includes(v as T);
@@ -32,8 +38,21 @@ export function parseScript(text: string, useVoice = false): Script {
     const vec3 = (v: unknown, label: string) => { if (!Array.isArray(v) || v.length !== 3 || v.some(n => typeof n !== "number")) throw new Error(`${at}${label} は [x, y, z] の形で書いてください。`); return v as [number, number, number]; };
     let camera: Scene["camera"];
     if (includes(CAMERAS, s.camera)) camera = s.camera;
-    else if (s.camera && typeof s.camera === "object") { const from = vec3(s.camera.from, "camera.from"), look = vec3(s.camera.look, "camera.look"); camera = { from, to: s.camera.to ? vec3(s.camera.to, "camera.to") : from, look, lookTo: s.camera.look_to ? vec3(s.camera.look_to, "camera.look_to") : look }; }
-    else throw new Error(`${at}camera は ${CAMERAS.join("、")} か、from と look の指定にしてください。`);
+    else if (s.camera && typeof s.camera === "object") {
+      const c = s.camera, num = (v: unknown, label: string, lo: number, hi: number, def?: number) => { const n = v === undefined ? def : v; if (typeof n !== "number" || !(n >= lo && n <= hi)) throw new Error(`${at}camera.${label} は ${lo}〜${hi} の数で書いてください。`); return n; };
+      const fov = c.fov === undefined ? undefined : num(c.fov, "fov", 20, 120);
+      if (c.path !== undefined) {
+        if (!Array.isArray(c.path) || c.path.length < 2) throw new Error(`${at}camera.path には2つ以上の点を書いてください。`);
+        camera = { kind: "path", points: c.path.map((q: any, k: number) => ({ at: vec3(q?.at, `camera.path ${k + 1}点目の at`), look: q?.look === undefined ? undefined : vec3(q.look, `camera.path ${k + 1}点目の look`) })), fov: fov ?? 80, bank: num(c.bank, "bank", 0, 60, 25) };
+      } else if (c.orbit !== undefined) {
+        const o = c.orbit, center = vec3(o?.center, "camera.orbit.center");
+        camera = { kind: "orbit", center, radius: num(o.radius, "orbit.radius", .5, 2000), height: num(o.height, "orbit.height", -100, 2000, center[1] + 2), start: num(o.start, "orbit.start", -3600, 3600, 0), turns: num(o.turns, "orbit.turns", -10, 10, 1), look: o.look === undefined ? center : vec3(o.look, "camera.orbit.look"), fov };
+      } else {
+        const from = vec3(c.from, "camera.from"), look = vec3(c.look, "camera.look");
+        camera = { kind: "move", from, to: c.to ? vec3(c.to, "camera.to") : from, look, lookTo: c.look_to ? vec3(c.look_to, "camera.look_to") : look, fov };
+      }
+    }
+    else throw new Error(`${at}camera は ${CAMERAS.join("、")} か、from と look、path(FPV)、orbit(周回)のどれかで指定してください。`);
     if (!Array.isArray(s.cast) || s.cast.length > 6 || s.cast.some((n: unknown) => typeof n !== "string")) throw new Error(`${at}cast に6人までの名前を書いてください。`);
     if (new Set(s.cast).size !== s.cast.length) throw new Error(`${at}cast に同じ名前があります。`);
     const looks: Record<string, Look> = {};
