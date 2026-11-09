@@ -18,7 +18,8 @@ export type CharacterAsset = Base & { kind: "人物"; born: number; died?: numbe
 export type ModelAsset = Base & { kind: "建物" | "小物" | "植物"; parts: Record<string, Part[]> };
 export type PlaceAsset = Base & {
   kind: "場所";
-  terrain: { centerZ: number; radius: number };
+  /** peak: 中央の山の高さ。river: 島を南北に裂く川(谷)。北の海から to_z まで流れ、南の端は池になる */
+  terrain: { centerZ: number; radius: number; peak: number; river?: { x: number; toZ: number; width: number; wiggle: number; lagoon: number } };
   items: { asset: string; at: Vec3; scale: number; rot: number; ground: boolean; state?: string }[];
   scatter: { asset: string; count: number; seed: number; ring: [number, number]; scale: [number, number]; spacing: number }[];
   exclude: { x: [number, number]; z: [number, number] }[];
@@ -66,7 +67,9 @@ export function parseAsset(raw: string, source: string): Asset {
     const items = (d.items ?? []).map((i: any) => ({ asset: String(i.asset), at: vec(i.at, "items.at"), scale: num(i.scale ?? 1, "items.scale"), rot: num(i.rot ?? 0, "items.rot"), ground: !!i.ground, state: i.state === undefined ? undefined : String(i.state) }));
     const scatter = (d.scatter ?? []).map((s: any) => ({ asset: String(s.asset), count: num(s.count, "scatter.count"), seed: num(s.seed, "scatter.seed"), ring: pair(s.ring, "scatter.ring"), scale: pair(s.scale ?? [1, 1], "scatter.scale"), spacing: num(s.spacing ?? 0, "scatter.spacing") }));
     const exclude = (d.exclude ?? []).map((e: any) => ({ x: pair(e.x, "exclude.x"), z: pair(e.z, "exclude.z") }));
-    return { ...base, kind: "場所", terrain: { centerZ: num(d.terrain?.center_z, "terrain.center_z"), radius: num(d.terrain?.radius, "terrain.radius") }, items, scatter, exclude, states: [...TIMES] };
+    const t = d.terrain ?? {}, rv = t.river;
+    const river = rv === undefined ? undefined : { x: num(rv.x ?? 0, "terrain.river.x"), toZ: num(rv.to_z, "terrain.river.to_z"), width: num(rv.width ?? 1.2, "terrain.river.width"), wiggle: num(rv.wiggle ?? 1.5, "terrain.river.wiggle"), lagoon: num(rv.lagoon ?? 0, "terrain.river.lagoon") };
+    return { ...base, kind: "場所", terrain: { centerZ: num(t.center_z, "terrain.center_z"), radius: num(t.radius, "terrain.radius"), peak: num(t.peak ?? 0, "terrain.peak"), river }, items, scatter, exclude, states: [...TIMES] };
   }
   if (d.kind === "動作") {
     if (!(VERBS as readonly string[]).includes(d.name)) throw new Error(`動作「${d.name}」の動きがコードにありません。`);

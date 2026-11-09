@@ -254,7 +254,7 @@ export class Renderer {
   }
   render(script:Script,time:number){
     const t=Math.min(time,script.duration),scene=sceneAt(script,t),sky=SKIES[scene.time],{eye,at,up,fov}=cameraAt(scene,t),place=this.place(scene.place);
-    const big=place.terrain.radius>30; this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120,up,fov);
+    const big=place.terrain.radius>45; this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120,up,fov);
     this.gl.depthMask(false); this.gl.uniform1f(this.u.uSky,1); this.gl.uniform3fv(this.u.uSkyTop,sky.top); this.draw("dome",translate(eye[0],eye[1],eye[2])); this.gl.uniform1f(this.u.uSky,0); this.gl.depthMask(true);
     const lv=scene.sea?lerp(scene.sea[0],scene.sea[1],ease((t-scene.start)/scene.seconds)):0;
     this.draw("sea",translate(0,lv,0),[1,1,1],scene.storm?.45:.12);
@@ -309,20 +309,38 @@ type Run={text:string;strong:boolean};
 function runsOf(narration:string,dropQuotes:boolean){ const out:{ch:string;strong:boolean}[]=[]; let strong=false; for(const ch of narration){ if(ch==="["){strong=true;continue;} if(ch==="]"){strong=false;continue;} if(dropQuotes&&"「」".includes(ch)) continue; out.push({ch,strong}); } return out; }
 const BREAK_AFTER="、。！？!?」』…,.";
 const NO_START="、。！？!?」』…ゃゅょっャュョッァィゥェォぁぃぅぇぉー,.";
-/** 字幕を、一度に出す短い区切りに分ける。句読点と改行で切り、長いものは max 字ごとに切る。 */
+/** 字幕を、一度に出す短い区切りに分ける。句読点で切り、長いものは言葉の切れ目(助詞のあと、かなから漢字に変わる所)で、なるべく均等に切る。台本の改行は区切りに使わない。 */
 export function chunksOf(narration:string,max:number):Run[][]{
-  const phrases:{ch:string;strong:boolean}[][]=[]; let cur:{ch:string;strong:boolean}[]=[];
-  for(const r of runsOf(narration,true)){ if(r.ch==="\n"){ if(cur.length) phrases.push(cur); cur=[]; continue; } cur.push(r); if(BREAK_AFTER.includes(r.ch)){ phrases.push(cur); cur=[]; } }
+  type C={ch:string;strong:boolean};
+  const phrases:C[][]=[]; let cur:C[]=[];
+  for(const r of runsOf(narration.replace(/\s*\n\s*/g,""),true)){ cur.push(r); if(BREAK_AFTER.includes(r.ch)){ phrases.push(cur); cur=[]; } }
   if(cur.length) phrases.push(cur);
-  const pieces:{ch:string;strong:boolean}[][]=[];
+  const kind=(c?:string)=>!c?"":/[\p{Script=Han}々〆ヶ]/u.test(c)?"kanji":/[\p{Script=Katakana}ー]/u.test(c)?"kata":/[\p{Script=Hiragana}]/u.test(c)?"hira":/[0-9０-９]/.test(c)?"num":/[A-Za-z]/.test(c)?"latin":"other";
+  const PARTICLE="はがをにでともへのや";
+  /** i 文字目の前で切るときの良さ。高いほど自然な切れ目 */
+  const score=(p:C[],i:number)=>{ const a=p[i-1]!.ch,b=p[i]!.ch,ka=kind(a),kb=kind(b);
+    if(NO_START.includes(b)) return -99;
+    if(ka===kb&&ka!=="hira") return -50; // 漢字やカタカナの途中では切らない
+    if(p[i-1]!.strong&&p[i]!.strong) return -40; // 強調した語の途中では切らない
+    let s=0; if(PARTICLE.includes(a)&&ka==="hira") s+=4; if(PARTICLE.includes(b)&&kb==="hira") s-=5; /* 助詞から始めない */ if(ka==="hira"&&(kb==="kanji"||kb==="kata"||kb==="num")) s+=2; if(ka==="hira"&&kb==="hira") s-=3; if(ka==="kanji"&&kb==="hira") s-=2; /* 送りがなや「たち」の前では切りにくくする */ if(p[i-1]!.strong!==p[i]!.strong) s+=1; return s; };
+  const pieces:C[][]=[];
   for(const p of phrases){
     let rest=p;
-    while(rest.length>max){ let cut=max; while(cut>Math.ceil(max/2)&&NO_START.includes(rest[cut]!.ch)) cut--; if(NO_START.includes(rest[cut]!.ch)) cut=max; pieces.push(rest.slice(0,cut)); rest=rest.slice(cut); }
-    if(rest.length) pieces.push(rest);
+    while(rest.length>max){
+      const n=Math.ceil(rest.length/max), target=Math.round(rest.length/n); let best=-1,bestScore=-1e9;
+      for(let i=Math.max(2,target-4);i<=Math.min(rest.length-2,max,target+4);i++){ const sc=score(rest,i)-Math.abs(i-target)*.6; if(sc>bestScore){bestScore=sc;best=i;} }
+      if(best<0) best=Math.min(rest.length-1,max);
+      pieces.push(rest.slice(0,best)); rest=rest.slice(best);
+    }
+    pieces.push(rest);
   }
-  // 3字以下の短い切れ端は、続きと合わせても長すぎなければ合わせる
-  const merged:{ch:string;strong:boolean}[][]=[];
-  for(const p of pieces){ const last=merged[merged.length-1]; if(last&&(last.length<=3||p.length<=2)&&last.length+p.length<=max+2) last.push(...p); else merged.push([...p]); }
+  // 2字以下の切れ端は、句読点で終わらなければ次と、終わるなら前と合わせる(長すぎなければ)
+  const merged:C[][]=[];
+  for(let i=0;i<pieces.length;i++){
+    const p=pieces[i]!, next=pieces[i+1], last=merged[merged.length-1], ends=BREAK_AFTER.includes(p[p.length-1]!.ch);
+    if(p.length<=2&&!ends&&next&&p.length+next.length<=max+1){ pieces[i+1]=[...p,...next]; continue; }
+    if(p.length<=2&&last&&last.length+p.length<=max+1) last.push(...p); else merged.push([...p]);
+  }
   return merged.map(p=>{ const runs:Run[]=[]; for(const r of p){ const l=runs[runs.length-1]; if(l&&l.strong===r.strong) l.text+=r.ch; else runs.push({text:r.ch,strong:r.strong}); } return runs; });
 }
 const chunkLen=(runs:Run[])=>runs.reduce((n,r)=>n+[...r.text.replace(/[、。！？!?」』…,.\s]/g,"")].length,0);

@@ -1,7 +1,7 @@
 import { CAMERAS, TIMES, VERBS, parseScript, type Script } from "./script";
 import { catalog, ofKind } from "./assets";
 import { Gallery } from "./gallery";
-import { Renderer, drawSubtitle } from "./render";
+import { Renderer, chunksOf, drawSubtitle } from "./render";
 import { exportMp4, saveFile, type ExportResult } from "./export";
 import yaml from "js-yaml";
 import { VoicePlayer, mixVoices, prepareVoices, voiceErrors, type Progress } from "./voice";
@@ -196,4 +196,4 @@ function say_errors() { return "読み込めなかった素材があります:\n
 const subEditor = new SubtitleEditor($("frame"), () => setPlaying(false));
 onStyleChange(() => { if (renderer && script) show(time); document.fonts?.load(fontString(40), "小さな島").then(() => { if (renderer && script) show(time); }).catch(() => {}); });
 void loadStyle().then(note => subEditor.loaded(note));
-(window as any).__sim = { show, get script() { return script; }, get gallery() { return gallery; }, catalog };
+(window as any).__sim = { chunksOf, show, get script() { return script; }, get gallery() { return gallery; }, catalog };

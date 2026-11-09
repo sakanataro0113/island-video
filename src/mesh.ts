@@ -24,14 +24,25 @@ export class MeshBuilder {
 }
 
 export type Terrain = PlaceAsset["terrain"];
-/** 地形の高さ。中心へ行くほど高く、岸で海へ沈む。 */
+/** 川の中心線の x。少し蛇行させる。 */
+export const riverX = (river: NonNullable<Terrain["river"]>, z: number) => river.x + river.wiggle*Math.sin(z*.11+.7);
+/** 地形の高さ。中心へ行くほど高く、岸で海へ沈む。peak があれば中央に山を足す。river があれば、海面より下まで谷を彫る(谷の底に海の面が見えて、川になる)。 */
 export function terrainHeight(terrain: Terrain, x: number, z: number): number {
   const dz = z-terrain.centerZ, d = Math.hypot(x, dz), a = Math.atan2(dz, x);
   const edge = terrain.radius + Math.sin(a*3+1)*1.0 + Math.sin(a*7)*0.5;
   if (d > edge) return 0.25 - (d - edge)*0.5;
   const inland = Math.max(0, edge - d - 5);
   const hill = 3.2*(1-Math.exp(-inland*inland*.018));
-  return 0.25 + hill + (inland > 0 ? (Math.sin(x*.9+1)+Math.sin(z*.7))*.1*Math.min(1,inland) : 0);
+  const mountain = terrain.peak ? terrain.peak*Math.max(0, 1 - d/(terrain.radius*.62))**2 : 0;
+  let h = 0.25 + hill + mountain + (inland > 0 ? (Math.sin(x*.9+1)+Math.sin(z*.7))*.1*Math.min(1,inland) : 0);
+  const r = terrain.river;
+  if (r) {
+    const bed = -0.35, slope = 1.1;
+    if (z <= r.toZ) h = Math.min(h, bed + Math.max(0, Math.abs(x - riverX(r, z)) - r.width)*slope);
+    else h = Math.min(h, bed + Math.max(0, Math.hypot(x - riverX(r, r.toZ), (z - r.toZ)*1.6) - r.width)*slope);
+    if (r.lagoon > 0) h = Math.min(h, bed + Math.max(0, Math.hypot(x - riverX(r, r.toZ), z - r.toZ) - r.lagoon)*slope);
+  }
+  return h;
 }
 
 function hash3(x: number, y: number, z: number, seed: number) {
@@ -118,6 +129,7 @@ export function buildPlace(place: PlaceAsset, byId: Map<string, Asset>): Float32
     for (let k = 0; k < s.count; k++) {
       const angle = q()*Math.PI*2, d = s.ring[0]+q()*(s.ring[1]-s.ring[0]), x = Math.cos(angle)*d, z = centerZ+Math.sin(angle)*d, sc = s.scale[0]+q()*(s.scale[1]-s.scale[0]);
       if (place.exclude.some(e => x>=e.x[0] && x<=e.x[1] && z>=e.z[0] && z<=e.z[1])) continue;
+      if (terrainHeight(place.terrain, x, z) < .45) continue; // 砂浜、水の中、川の谷の底には生やさない
       const r = s.spacing*sc;
       if (r > 0 && taken.some(([tx,tz,tr]) => Math.hypot(tx-x,tz-z) < r+tr)) { q(); continue; }
       if (r > 0) taken.push([x,z,r]);
