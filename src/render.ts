@@ -1,4 +1,4 @@
-import { catalog, characterByName, looksOf, placeByName, type Asset, type Look, type ModelAsset, type PlaceAsset } from "./assets";
+import { catalog, characterByName, titleAt, looksOf, placeByName, type Asset, type Look, type ModelAsset, type PlaceAsset } from "./assets";
 import { buildBlob, buildCube, buildDome, buildSkirt, buildModel, buildPlace, buildSea, terrainHeight, type Terrain } from "./mesh";
 import { chain, rng, clamp01, ease, identity, lerp, lookAt, perspective, rotX, rotY, scale, translate, type Mat4, type Vec3 } from "./math";
 import { sceneAt, type CameraPath, type Prop, type Scene, type Script } from "./script";
@@ -335,11 +335,19 @@ export function drawSubtitle(canvas: HTMLCanvasElement, script: Script, time: nu
   if(!scene.narration) return;
   const tags=scene.speaker?characterByName(scene.speaker)?.tags??[]:[];
   const village=tags.includes("はま村")?"#0b7a6e":tags.includes("もり村")?"#7a3fa6":null;
-  if(style.mode==="chunk") drawChunks(c,W,H,scene,t,village);
-  else drawBox(c,W,H,scene,village,rounded,u);
+  const title=speakerTitleOf(script,scene);
+  if(style.mode==="chunk") drawChunks(c,W,H,scene,t,village,title);
+  else drawBox(c,W,H,scene,village,rounded,u,title);
 }
 
 type Run={text:string;strong:boolean};
+/** 話者名の下に出す所属と役職。設定が「最初だけ」なら、その話でその人物の最初のセリフにだけ出す。 */
+function speakerTitleOf(script:Script,scene:Scene):string{
+  if(!scene.speaker||!style.speaker||style.speakerTitle==="none") return "";
+  if(style.speakerTitle==="first"&&script.scenes.find(s=>s.speaker===scene.speaker)!==scene) return "";
+  if(scene.speakerTitle!==undefined) return scene.speakerTitle;
+  const ch=characterByName(scene.speaker); return ch?titleAt(ch,script.year):"";
+}
 /** 字幕の文を、強調([ ])の印つきの文字に分ける。chunk のときは「」も取る。 */
 function runsOf(narration:string,dropQuotes:boolean){ const out:{ch:string;strong:boolean}[]=[]; let strong=false; for(const ch of narration){ if(ch==="["){strong=true;continue;} if(ch==="]"){strong=false;continue;} if(dropQuotes&&"「」".includes(ch)) continue; out.push({ch,strong}); } return out; }
 const BREAK_AFTER="、。！？!?」』…,.";
@@ -380,7 +388,7 @@ export function chunksOf(narration:string,max:number):Run[][]{
 }
 const chunkLen=(runs:Run[])=>runs.reduce((n,r)=>n+[...r.text.replace(/[、。！？!?」』…,.\s]/g,"")].length,0);
 /** 短い区切りを、読み上げの速さに合わせて順に出す。音声がなければ、カットの長さに合わせる。 */
-function drawChunks(c:CanvasRenderingContext2D,W:number,H:number,scene:Scene,t:number,village:string|null){
+function drawChunks(c:CanvasRenderingContext2D,W:number,H:number,scene:Scene,t:number,village:string|null,title:string){
   const chunks=chunksOf(scene.narration,style.chunk); if(!chunks.length) return;
   const voiced=audioOf(scene.voice)?.duration, from=scene.start+(voiced?VOICE_LEAD:.1), span=voiced??Math.max(.6,scene.seconds-.5);
   const weights=chunks.map(r=>Math.max(1,chunkLen(r))), total=weights.reduce((a,b)=>a+b,0);
@@ -394,7 +402,7 @@ function drawChunks(c:CanvasRenderingContext2D,W:number,H:number,scene:Scene,t:n
   const runs=chunks[i]!, chars=runs.flatMap(r=>[...r.text].map(ch=>({ch,strong:r.strong})));
   const lines:{ch:string;strong:boolean}[][]=[[]]; let w=0;
   for(const q of chars){ const cw=c.measureText(q.ch).width; if(w+cw>maxW&&lines[lines.length-1]!.length&&!NO_START.includes(q.ch)){ lines.push([]); w=0; } lines[lines.length-1]!.push(q); w+=cw; }
-  const lh=px*1.18, top=-(lines.length-1)*lh/2;
+  const lh=px*style.lineHeight, top=-(lines.length-1)*lh/2;
   const label=scene.speaker?(style.speaker?scene.speaker:""):(style.narratorLabel?"歴史家の記録":"");
   const paint=(text:string,x:number,y:number,fill:string,size:number)=>{
     c.font=fontString(size);
@@ -403,18 +411,28 @@ function drawChunks(c:CanvasRenderingContext2D,W:number,H:number,scene:Scene,t:n
     c.fillStyle=fill; c.fillText(text,x,y);
   };
   // 話者名は、村の色の小さな札に白い文字で出す
-  if(label){ const ls=px*.5; c.font=fontString(ls); const lw=c.measureText(label).width, ph=ls*1.45, pw=lw+ls*1.1, py=top-lh*.5-ph*.75;
-    c.save(); if(style.shadow){ c.shadowColor="rgba(0,0,0,.35)"; c.shadowBlur=ls*.3; c.shadowOffsetY=ls*.08; } c.fillStyle=village??"#1a1a1a"; c.beginPath(); c.roundRect(-pw/2,py-ph/2,pw,ph,ph*.3); c.fill(); c.restore();
-    c.fillStyle="#ffffff"; c.fillText(label,-lw/2,py); c.font=fontString(px); }
+  if(label){ const ls=px*.5, ts=ls*.7; c.font=fontString(ls); const lw=c.measureText(label).width; c.font=fontString(ts); const tw=title?c.measureText(title).width:0;
+    const ph=ls*1.45+(title?ts*1.25:0), pw=Math.max(lw,tw)+ls*1.1, bottom=top-lh*.5-ls*.25, ptop=bottom-ph;
+    c.save(); if(style.shadow){ c.shadowColor="rgba(0,0,0,.35)"; c.shadowBlur=ls*.3; c.shadowOffsetY=ls*.08; } c.fillStyle=village??"#1a1a1a"; c.beginPath(); c.roundRect(-pw/2,ptop,pw,ph,ls*.42); c.fill(); c.restore();
+    c.fillStyle="#ffffff"; c.font=fontString(ls); c.fillText(label,-lw/2,ptop+ls*.75);
+    // 所属と役職は透かさず、細い字(DADS の N)で名前と分ける。白い字のまま村の色との比を保つ
+    if(title){ c.font=fontString(ts,{...style,weight:style.font==="Noto Sans JP"?400:style.weight}); c.fillText(title,-tw/2,ptop+ls*1.45+ts*.5); }
+    c.font=fontString(px); }
   lines.forEach((line,n)=>{
-    c.font=fontString(px); const lw=line.reduce((s,q)=>s+c.measureText(q.ch).width,0); let x=-lw/2; const y=top+n*lh;
+    c.font=fontString(px); const bandPad=px*.14;
+    const gaps=style.emphasis==="band"?line.reduce((g,q,m)=>g+(q.strong&&(m===0||!line[m-1]!.strong)&&m>0?1:0)+(q.strong&&m<line.length-1&&!line[m+1]!.strong?1:0),0):0;
+    const lw=line.reduce((s,q)=>s+c.measureText(q.ch).width,0)+gaps*bandPad; let x=-lw/2; const y=top+n*lh;
     // 同じ色の文字はまとめて描く(縁取りが文字の間で切れないように)
-    let j=0; while(j<line.length){ let e=j; while(e<line.length&&line[e]!.strong===line[j]!.strong) e++; const text=line.slice(j,e).map(q=>q.ch).join(""); c.font=fontString(px); const tw=c.measureText(text).width; paint(text,x,y,line[j]!.strong?style.accent:(village&&!style.speaker?village:style.color),px); x+=tw; j=e; }
+    let j=0; while(j<line.length){ let e=j; while(e<line.length&&line[e]!.strong===line[j]!.strong) e++; const text=line.slice(j,e).map(q=>q.ch).join(""); c.font=fontString(px); const tw=c.measureText(text).width; const strong=line[j]!.strong;
+      // 帯は前後の文字に重ならないよう、帯の余白ぶん字送りを空ける
+      if(strong&&style.emphasis==="band"){ const padY=px*.08; if(j>0) x+=bandPad; c.fillStyle=style.accent; c.beginPath(); c.roundRect(x-bandPad,y-px*.5-padY,tw+bandPad*2,px+padY*2,px*.12); c.fill(); c.fillStyle=style.color; c.fillText(text,x,y); x+=tw+(e<line.length?bandPad:0); }
+      else { paint(text,x,y,strong?style.accent:(village&&!style.speaker?village:style.color),px); x+=tw; }
+      j=e; }
   });
   c.restore();
 }
 /** 1カットの字幕を白い札にまとめて出す(以前の見た目)。 */
-function drawBox(c:CanvasRenderingContext2D,W:number,H:number,scene:Scene,village:string|null,rounded:(x:number,y:number,w:number,h:number,r:number,tail?:boolean)=>void,u:number){
+function drawBox(c:CanvasRenderingContext2D,W:number,H:number,scene:Scene,village:string|null,rounded:(x:number,y:number,w:number,h:number,r:number,tail?:boolean)=>void,u:number,title:string){
   const ink="#1a1a1a",paper=`rgba(255,255,255,${style.boxOpacity})`;
   const size=style.size*W*.8,boxW=W*.83,x=style.x*W-boxW/2,pad=22*u,maxW=boxW-pad*2;
   c.textAlign="left"; c.textBaseline="alphabetic"; c.font=fontString(size);
@@ -432,7 +450,7 @@ function drawBox(c:CanvasRenderingContext2D,W:number,H:number,scene:Scene,villag
   const showLabel=scene.speaker?style.speaker:style.narratorLabel;
   const who=scene.speaker??"歴史家の記録",whoSize=size*.58,lh=size*1.42,h=15*u+(showLabel?whoSize*1.35:0)+lh*lines.length+12*u,y=style.y*H-h/2;
   rounded(x,y,boxW,h,8*u,!!scene.speaker); c.fillStyle=paper; c.fill(); c.lineWidth=2*u; c.strokeStyle=ink; c.stroke();
-  if(showLabel){ c.font=fontString(whoSize); c.fillStyle=village??style.accent; c.fillText(who,x+pad,y+15*u+whoSize); }
+  if(showLabel){ c.font=fontString(whoSize); c.fillStyle=village??style.accent; c.fillText(who,x+pad,y+15*u+whoSize); if(title){ const ww=c.measureText(who).width; c.font=fontString(whoSize*.72); c.fillText(title,x+pad+ww+whoSize*.5,y+15*u+whoSize); } }
   c.font=fontString(size);
   lines.forEach((line,i)=>{ let px=x+pad; const py=y+15*u+(showLabel?whoSize*1.35:0)+lh*i+size*1.08; for(const run of line){ const w=c.measureText(run.text).width; c.fillStyle=village??(run.strong?style.accent:ink); c.fillText(run.text,px,py); if(village&&run.strong) c.fillRect(px,py+5*u,w,3*u); px+=w; } });
 }

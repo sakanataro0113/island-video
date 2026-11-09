@@ -8,7 +8,7 @@ import { VoicePlayer, mixVoices, prepareVoices, voiceErrors, type Progress } fro
 import { loadSettings, onSettingsChange } from "./settings";
 import { VoicePages, type Line } from "./voice-pages";
 import { SubtitleEditor } from "./subtitle-editor";
-import { fontString, loadStyle, onStyleChange, style } from "./subtitle-style";
+import { DEFAULT_STYLE, setStyle, fontString, loadStyle, onStyleChange, style } from "./subtitle-style";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const gl = $<HTMLCanvasElement>("gl"), overlay = $<HTMLCanvasElement>("overlay"), text = $<HTMLTextAreaElement>("text");
@@ -196,4 +196,4 @@ function say_errors() { return "読み込めなかった素材があります:\n
 const subEditor = new SubtitleEditor($("frame"), () => setPlaying(false));
 onStyleChange(() => { if (renderer && script) show(time); document.fonts?.load(fontString(40), "小さな島").then(() => { if (renderer && script) show(time); }).catch(() => {}); });
 void loadStyle().then(note => subEditor.loaded(note));
-(window as any).__sim = { chunksOf, show, get script() { return script; }, get gallery() { return gallery; }, catalog };
+(window as any).__sim = { chunksOf, show, setStyle, DEFAULT_STYLE, get script() { return script; }, get gallery() { return gallery; }, catalog };

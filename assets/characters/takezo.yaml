@@ -3,6 +3,10 @@ kind: 人物
 name: タケゾウ
 tags: [もり村, 黒木家, 村長]
 born: -36
+# 肩書き。字幕の話者名の下に出す。from_year は「島に来て○年目」
+titles:
+  - {from_year: 1, text: 木こりの長}
+  - {from_year: 2, text: もり村の村長}
 clothes: "#3f2a5c"
 hair: "#35302c"
 skin: "#cc9f79"

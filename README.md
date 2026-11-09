@@ -14,7 +14,7 @@
 
 | フォルダ | 種類 | 主な項目 |
 |---|---|---|
-| characters | 人物 | born、died、clothes、hair、skin、hair_style、states |
+| characters | 人物 | born、died、titles(年ごとの肩書き)、clothes、hair、skin、hair_style、states |
 | buildings / props / plants | 建物、小物、植物 | states ごとの parts(box または cone) |
 | places | 場所 | terrain、items、scatter、exclude |
 | motions | 動作 | 動きの計算はコード側の `render.ts` にあります |
@@ -34,6 +34,8 @@
 ## 字幕の見た目
 
 映像タブの「字幕の見た目」で、表示の形(短く区切って次々に出す/白い札にまとめる)、書体、大きさ、位置、一度に出す文字数、色、縁取り、影などを変えられます。開いている間は、プレビューの上をドラッグすると位置が動きます。「保存」すると Cloudflare D1(表 `prefs`)に保存され、書き出す MP4 にも同じ見た目が使われます。
+
+セリフの話者名の下には、人物の titles から、その話の年の肩書き(所属と役職)を出します。出すのは、その話で最初のセリフだけ、毎回、出さないから選べます。台本のカットに `speaker_title` を書くと、そのカットだけ肩書きを変えられます。
 
 短く区切る形では、字幕を句読点と文字数で区切り、読み上げ音声の長さに合わせて順に出します(音声がないときはカットの長さに合わせます)。
 

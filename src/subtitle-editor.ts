@@ -19,6 +19,7 @@ const FIELDS: Field[] = [
   { key: "chunk", label: "一度に出す文字数", kind: "range", min: 3, max: 30, step: 1, show: v => `${v}字まで`, only: "chunk" },
   { key: "color", label: "文字の色", kind: "color" },
   { key: "accent", label: "強調の色([ ]の語)", kind: "color" },
+  { key: "lineHeight", label: "行の高さ(2行のとき)", kind: "range", min: 1, max: 2, step: .05, show: v => `文字の${pct(v)}`, only: "chunk" },
   { key: "stroke", label: "縁の色", kind: "color", only: "chunk" },
   { key: "strokeWidth", label: "縁の太さ", kind: "range", min: 0, max: .4, step: .01, show: v => v ? `文字の${pct(v)}` : "なし", only: "chunk" },
   { key: "boxOpacity", label: "札の白の濃さ", kind: "range", min: 0, max: 1, step: .05, show: pct, only: "box" },
@@ -50,9 +51,15 @@ export class SubtitleEditor {
     mode.append(el("option", { value: "chunk", textContent: "短く区切って次々に出す(札なし)" }), el("option", { value: "box", textContent: "1カット分を白い札にまとめる" }));
     mode.onchange = () => this.set({ mode: mode.value as SubtitleStyle["mode"] });
     const font = el("select", { id: "sub-font" });
-    for (const f of FONTS) for (const w of f.weights) font.append(el("option", { value: `${f.family}|${w}`, textContent: f.weights.length > 1 ? `${f.label} ${w === 900 ? "極太" : "太字"}` : f.label }));
+    for (const f of FONTS) for (const w of f.weights) font.append(el("option", { value: `${f.family}|${w}`, textContent: f.weights.length > 1 ? `${f.label} ${w === 900 ? "極太" : "太字(DADS の B)"}` : f.label }));
     font.onchange = () => { const [family, w] = font.value.split("|"); this.set({ font: family, weight: Number(w) }); };
-    body.append(this.row("表示の形", mode), this.row("書体", font));
+    const title = el("select", { id: "sub-speakerTitle" });
+    title.append(el("option", { value: "first", textContent: "その話の最初のセリフだけ" }), el("option", { value: "always", textContent: "毎回" }), el("option", { value: "none", textContent: "出さない" }));
+    title.onchange = () => this.set({ speakerTitle: title.value as SubtitleStyle["speakerTitle"] });
+    const emph = el("select", { id: "sub-emphasis" });
+    emph.append(el("option", { value: "band", textContent: "強調色の帯に白い文字" }), el("option", { value: "color", textContent: "文字の色だけ変える" }));
+    emph.onchange = () => this.set({ emphasis: emph.value as SubtitleStyle["emphasis"] });
+    body.append(this.row("表示の形", mode), this.row("書体", font), this.row("話者名の下に所属と役職", title), this.row("[ ]の語の強調", emph, undefined, "chunk"));
     for (const f of FIELDS) {
       const id = "sub-" + f.key;
       let input: HTMLInputElement;
@@ -91,6 +98,8 @@ export class SubtitleEditor {
   private sync() {
     $<HTMLSelectElement>("sub-mode").value = style.mode;
     $<HTMLSelectElement>("sub-font").value = `${style.font}|${style.weight}`;
+    $<HTMLSelectElement>("sub-speakerTitle").value = style.speakerTitle;
+    $<HTMLSelectElement>("sub-emphasis").value = style.emphasis;
     for (const f of FIELDS) {
       const input = $<HTMLInputElement>("sub-" + f.key), v = style[f.key];
       if (f.kind === "check") input.checked = !!v;

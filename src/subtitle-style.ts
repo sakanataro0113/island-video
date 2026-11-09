@@ -21,10 +21,16 @@ export type SubtitleStyle = {
   pop: boolean;
   /** セリフのとき、話者名を小さく出す */
   speaker: boolean;
+  /** 話者名の下に所属と役職を出す。first はその話で最初のセリフだけ */
+  speakerTitle: "first" | "always" | "none";
   /** 語りのとき、「歴史家の記録」の見出しを出す */
   narratorLabel: boolean;
   /** 札の白の濃さ(box のとき) */
   boxOpacity: number;
+  /** [ ]の語の強調。band: 強調色の帯に白い文字(縁取りの上でも読める)。color: 文字の色だけ変える */
+  emphasis: "band" | "color";
+  /** 行の高さ(文字の大きさに対する倍率)。2行になったときに効く */
+  lineHeight: number;
 };
 
 /** 選べる書体。Google Fonts から読み込む(index.html)。 */
@@ -34,11 +40,18 @@ export const FONTS: { family: string; label: string; weights: number[] }[] = [
   { family: "M PLUS Rounded 1c", label: "M PLUS Rounded 1c(丸ゴシック)", weights: [800] },
 ];
 
-/** 初期値: 参考動画のような、札なし・太い縁取り・短く区切る字幕。 */
+/**
+ * 初期値: デジタル庁デザインシステム(DADS)の色と書体を土台に、参考動画の「短く区切って次々に出す」出し方を取り入れたもの。
+ * - 書体は Noto Sans JP の B(700)。DADS の太さは N(400) と B(700) の2つだけ
+ * - 色は DADS のデザイントークン(@digital-go-jp/design-tokens 2.1.0)の値: 白 #ffffff、Gray-900 #1a1a1a、Blue-900 #0017c1
+ * - 強調は Blue-900 の帯に白い文字(コントラスト比 11.1:1)。青い文字に黒い縁では 1.57:1 で、DADS の 4.5:1 を満たさない
+ * - 影と弾む動きは使わない。行の高さは DADS の見出し(Display)と同じ 140%
+ * - 縁取りは DADS にない。映像の上で文字を読ませるための例外(白と縁の比は 17.4:1)
+ */
 export const DEFAULT_STYLE: SubtitleStyle = {
-  mode: "chunk", font: "Noto Sans JP", weight: 900, size: .085, x: .5, y: .66, chunk: 9,
-  color: "#ffffff", accent: "#ff4a3d", stroke: "#111111", strokeWidth: .2, shadow: true, pop: true,
-  speaker: true, narratorLabel: false, boxOpacity: .7,
+  mode: "chunk", font: "Noto Sans JP", weight: 700, size: .085, x: .5, y: .66, chunk: 9,
+  color: "#ffffff", accent: "#0017c1", stroke: "#1a1a1a", strokeWidth: .16, shadow: false, pop: false,
+  speaker: true, speakerTitle: "first", narratorLabel: false, boxOpacity: .7, emphasis: "band", lineHeight: 1.4,
 };
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -49,14 +62,17 @@ export function cleanStyle(s: any): SubtitleStyle {
   return {
     mode: s?.mode === "box" ? "box" : "chunk",
     font: font.family,
-    weight: font.weights.includes(s?.weight) ? s.weight : font.weights[font.weights.length - 1]!,
+    weight: font.weights.includes(s?.weight) ? s.weight : font.weights.includes(d.weight) ? d.weight : font.weights[font.weights.length - 1]!,
     size: clamp(s?.size, .03, .16, d.size), x: clamp(s?.x, .1, .9, d.x), y: clamp(s?.y, .1, .95, d.y),
     chunk: Math.round(clamp(s?.chunk, 3, 30, d.chunk)),
     color: HEX.test(s?.color) ? s.color : d.color, accent: HEX.test(s?.accent) ? s.accent : d.accent, stroke: HEX.test(s?.stroke) ? s.stroke : d.stroke,
     strokeWidth: clamp(s?.strokeWidth, 0, .4, d.strokeWidth),
     shadow: typeof s?.shadow === "boolean" ? s.shadow : d.shadow, pop: typeof s?.pop === "boolean" ? s.pop : d.pop,
-    speaker: typeof s?.speaker === "boolean" ? s.speaker : d.speaker, narratorLabel: typeof s?.narratorLabel === "boolean" ? s.narratorLabel : d.narratorLabel,
+    speaker: typeof s?.speaker === "boolean" ? s.speaker : d.speaker,
+    speakerTitle: ["first", "always", "none"].includes(s?.speakerTitle) ? s.speakerTitle : d.speakerTitle, narratorLabel: typeof s?.narratorLabel === "boolean" ? s.narratorLabel : d.narratorLabel,
     boxOpacity: clamp(s?.boxOpacity, 0, 1, d.boxOpacity),
+    emphasis: s?.emphasis === "color" ? "color" : s?.emphasis === "band" ? "band" : d.emphasis,
+    lineHeight: clamp(s?.lineHeight, 1, 2, d.lineHeight),
   };
 }
 
