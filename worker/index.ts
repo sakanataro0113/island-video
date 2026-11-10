@@ -13,6 +13,30 @@ const CHIRP = /^(?:ja-JP|en-US)-Chirp3-HD-[A-Za-z]+$/, GEMINI = /^(?:[A-Za-z]+|v
 const MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"];
 const reply = (status: number, message: string) => new Response(message, { status, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 const audio = (bytes: Uint8Array, type: string) => new Response(bytes, { headers: { "Content-Type": type, "Cache-Control": "private, max-age=31536000, immutable" } });
+/**
+ * Gemini の 429 を、どの上限に当たったかが分かる形で返す。
+ * 1日の回数上限(Tier 1 の TTS は1モデル1日100回)なら X-Quota: day、1分あたりの上限なら Retry-After を付ける(サイト側が待って自動でやり直す)。
+ */
+function quotaReply(raw: string): Response {
+  let id = "", value = "", wait = 0, message = "";
+  try {
+    const e = JSON.parse(raw)?.error ?? {}; message = String(e.message ?? "");
+    for (const d of e.details ?? []) {
+      for (const v of d?.violations ?? []) { id ||= String(v?.quotaId ?? v?.quotaMetric ?? ""); value ||= String(v?.quotaValue ?? ""); }
+      if (typeof d?.retryDelay === "string") wait = Math.ceil(parseFloat(d.retryDelay) || 0);
+    }
+  } catch { message = raw.slice(0, 300); }
+  const headers: Record<string, string> = { "Content-Type": "text/plain; charset=utf-8" };
+  if (/PerDay/i.test(id + message)) {
+    headers["X-Quota"] = "day";
+    return new Response(`Gemini の音声合成の「1日の回数上限」${value ? `(${value}回)` : ""}に達しました。1カットで1回使います。上限は米国太平洋時間の0時(日本時間の17時)に戻ります。それまでは、作れた音声だけ保存されています。`, { status: 429, headers });
+  }
+  if (/PerMinute/i.test(id + message) || wait) {
+    headers["X-Quota"] = "minute"; headers["Retry-After"] = String(Math.max(5, Math.min(90, wait || 30)));
+    return new Response(`Gemini の音声合成の「1分あたりの上限」${value ? `(${value})` : ""}に達しました。少し待ってから、もう一度読み込んでください。`, { status: 429, headers });
+  }
+  return new Response(`Gemini API の利用上限に達しました(429)。月額上限の可能性があります。AI Studio の Spend を確認してください。詳細: ${message.slice(0, 300)}`, { status: 429, headers });
+}
 const fromBase64 = (s: string) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 
 export default {
@@ -47,7 +71,7 @@ async function gemini(q: URLSearchParams, text: string, voice: string, env: Env)
   };
   const res = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY }, body: JSON.stringify(body) });
   if (res.status === 402) return reply(502, "Gemini API の残高がありません(402)。AI Studio の Billing でクレジットを足してください。");
-  if (res.status === 429) return reply(502, "Gemini API の利用上限に達しました(429)。月額上限か、短時間の回数制限の可能性があります。少し待つか、AI Studio の Spend を確認してください。");
+  if (res.status === 429) return quotaReply(await res.text());
   if (!res.ok) return reply(502, `Gemini の音声合成がエラーを返しました(${res.status}): ${(await res.text()).slice(0, 400)}`);
   const found = lastAudio(await res.json());
   if (!found) return reply(502, "Gemini の音声合成から音声が返りませんでした。");

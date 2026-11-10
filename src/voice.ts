@@ -125,7 +125,12 @@ async function fetchAudio(v: Voice): Promise<AudioBuffer> {
   let store: Cache | null = null;
   try { store = await caches.open("tts-v1"); bytes = await (await store.match(url))?.arrayBuffer() ?? null; } catch { store = null; }
   if (!bytes) {
-    const res = await fetch(url);
+    let res = await fetch(url);
+    // 1分あたりの上限なら、言われた秒数だけ待って3回までやり直す(1日の上限なら待たずに止める)
+    for (let tries = 0; res.status === 429 && res.headers.get("X-Quota") === "minute" && tries < 3; tries++) {
+      await new Promise(r => setTimeout(r, Number(res.headers.get("Retry-After") ?? 30) * 1000));
+      res = await fetch(url);
+    }
     if (!res.ok) throw new Error(res.status === 404 ? "音声の窓口(/api/tts)が見つかりません。Cloudflareに公開したサイトで使ってください。" : await res.text());
     if (!(res.headers.get("Content-Type") ?? "").startsWith("audio/")) throw new Error("音声ではない応答が返りました。ログインが切れている可能性があります。ページを再読み込みしてください。");
     const type = res.headers.get("Content-Type") ?? "audio/mpeg";
@@ -141,7 +146,7 @@ async function fetchAudio(v: Voice): Promise<AudioBuffer> {
 /**
  * 声がほとんど入っていない音声や、後ろに長い無音が付いた音声を弾く。
  * Gemini の音声合成は、まれにこうした音声を「成功」として返すことがある(料金はかかる)。
- * 日本語の読み上げを1秒7字前後として、声の入っている長さが目安の3割に満たないか、全体が目安の3倍+2秒を超えたら失敗とする。
+ * 読み上げを1秒7字前後(英語は14字)として、声の入っている長さが目安の3割に満たないか、全体が目安の3倍+2秒を超えたら失敗とする。
  */
 export function checkSpeech(buf: AudioBuffer, text: string) {
   const data = buf.getChannelData(0), win = Math.max(1, Math.round(buf.sampleRate * .02));
@@ -151,7 +156,9 @@ export function checkSpeech(buf: AudioBuffer, text: string) {
     for (let j = i; j < end; j++) sum += data[j]! * data[j]!;
     if (Math.sqrt(sum / (end - i)) > .01) voiced++;
   }
-  const spoken = voiced * win / buf.sampleRate, expected = [...text].length / 7;
+  // 目安の速さ: 日本語は1秒7字、英語は1秒14字
+  const latin = (text.match(/[A-Za-z]/g) ?? []).length > [...text].length / 2;
+  const spoken = voiced * win / buf.sampleRate, expected = [...text].length / (latin ? 14 : 7);
   if (spoken < Math.max(.2, expected * .3)) throw new Error(`「${text.slice(0, 20)}…」の音声に、声がほとんど入っていませんでした(${spoken.toFixed(1)}秒)。もう一度読み込むと作り直します。続く場合は voices.yaml の temperature を上げるか消してください。`);
   if (buf.duration > expected * 3 + 2) throw new Error(`「${text.slice(0, 20)}…」の音声が長すぎます(${buf.duration.toFixed(1)}秒、声は${spoken.toFixed(1)}秒)。もう一度読み込むと作り直します。`);
 }
@@ -174,7 +181,8 @@ export async function prepareVoices(list: Voice[], onProgress: (p: Progress) => 
   const queue = [...need];
   if (need.length) tell();
   // 1つ失敗したら、残りは頼まない(料金の無駄を防ぐ)
-  await Promise.all(Array.from({ length: 4 }, async () => { while (queue.length && !failed) await one(queue.shift()!); }));
+  // 同時に頼むのは2つまで(1分あたりの上限に当たりにくくする)
+  await Promise.all(Array.from({ length: 2 }, async () => { while (queue.length && !failed) await one(queue.shift()!); }));
   return need.length;
 }
 /** 1つだけ用意する(試聴用)。 */
