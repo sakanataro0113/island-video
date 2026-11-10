@@ -89,7 +89,7 @@ export function applySpots(text: string, spots = settings.spots) {
   return out + chars.slice(at).join("");
 }
 /** 台本の字幕の文から、字幕の飾りを取る。強調の[ ]、セリフの「」、改行を取る。 */
-export const plainText = (narration: string) => narration.replace(/[\[\]「」]/g, "").replace(/([\x21-\x7e])\s*\n\s*(?=[\x21-\x7e])/g, "$1 ").replace(/\s*\n\s*/g, "").trim(); // 英字どうしの改行は空白にする
+export const plainText = (narration: string) => narration.replace(/[\[\]「」]/g, "").replace(/~/g, " ").replace(/([\x21-\x7e])\s*\n\s*(?=[\x21-\x7e])/g, "$1 ").replace(/\s*\n\s*/g, "").trim(); // 英字どうしの改行は空白にする
 /** 字幕の文から、実際に読ませる文を作る。 */
 export const speechText = (narration: string) => applySpots(plainText(narration));
 

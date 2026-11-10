@@ -409,6 +409,7 @@ function chunksOfLatin(narration:string,max:number):Run[][]{
         const a=rest[k-1]!, b=rest[k]!; let sc=-Math.abs(k-cut);
         if(WEAK.has(bare(a))) sc-=3; // 「the」などで終えない
         if(a[a.length-1]!.strong&&b[0]!.strong) sc-=4; // 強調の途中で切らない
+        if(/^[A-Z]/.test(text(a))&&/^[A-Z]/.test(text(b))) sc-=4; // Forest Village などの名前の途中で切らない
         if(sc>bestScore){ bestScore=sc; best=k; }
       }
       out.push(rest.slice(0,best)); rest=rest.slice(best);
@@ -420,6 +421,8 @@ function chunksOfLatin(narration:string,max:number):Run[][]{
   for(let k=0;k<out.length;k++){ const p=out[k]!, next=out[k+1];
     if(p.length===1&&next&&!/[.,!?;:]$/.test(text(p[0]!))&&p.length+next.length<=max+1){ out[k+1]=[...p,...next]; continue; }
     merged.push(p); }
+  // 台本の「~」は、区切らない空白(river~mouth など)。画面では空白にする
+  for(const ws of merged) for(const w of ws) for(const q of w) if(q.ch==="~") q.ch=" ";
   return merged.map(ws=>{ const runs:Run[]=[]; ws.forEach((w,k)=>{ const all=k?[{ch:" ",strong:ws[k-1]![ws[k-1]!.length-1]!.strong&&w[0]!.strong},...w]:w; for(const r of all){ const l=runs[runs.length-1]; if(l&&l.strong===r.strong) l.text+=r.ch; else runs.push({text:r.ch,strong:r.strong}); } }); return runs; });
 }
 const chunkLen=(runs:Run[])=>runs.reduce((n,r)=>n+[...r.text.replace(/[、。！？!?」』…,.\s]/g,"")].length,0);

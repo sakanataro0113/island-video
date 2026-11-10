@@ -11,3 +11,12 @@ states:
       - {shape: cone, at: [0, 0.12, 0.02], radius: 0.05, height: 0.12, sides: 5, color: "#48697a"}
       - {shape: box, at: [0.082, 0.035, 0.22], size: [0.02, 0.035, 0.035], color: "#111418"}
       - {shape: box, at: [-0.082, 0.035, 0.22], size: [0.02, 0.035, 0.035], color: "#111418"}
+  # 第3話: 裁いている間に腐った魚。色をくすませ、目を白く濁らせる
+  - name: 腐った
+    parts:
+      - {shape: sphere, at: [0, 0, 0], scale: [0.09, 0.13, 0.32], detail: 2, jitter: 0.03, seed: 2, color: "#8f9a78"}
+      - {shape: sphere, at: [0, 0.03, 0], scale: [0.075, 0.1, 0.3], detail: 1, jitter: 0.02, seed: 4, color: "#5b5f3f"}
+      - {shape: cone, at: [0, 0, -0.26], radius: 0.12, height: 0.18, sides: 6, rot: [-90, 0, 0], color: "#5b5f3f"}
+      - {shape: cone, at: [0, 0.1, 0.02], radius: 0.04, height: 0.08, sides: 5, color: "#5b5f3f"}
+      - {shape: box, at: [0.082, 0.035, 0.22], size: [0.02, 0.035, 0.035], color: "#d9d6c3"}
+      - {shape: box, at: [-0.082, 0.035, 0.22], size: [0.02, 0.035, 0.035], color: "#d9d6c3"}
