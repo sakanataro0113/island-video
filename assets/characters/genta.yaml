@@ -1,12 +1,17 @@
 id: genta
 kind: 人物
 name: ゲンタ
+name_en: "Genta"
 tags: [はま村, 網田家, 漁師]
 born: -22
 # 肩書き。字幕の話者名の下に出す。from_year は「島に来て○年目」
 titles:
   - {from_year: 1, text: 漁師}
   - {from_year: 2, text: はま村の漁師}
+# 英語版の肩書き
+titles_en:
+  - {from_year: 1, text: "Fisher"}
+  - {from_year: 2, text: "Shore Village fisher"}
 clothes: "#2f7d70"
 hair: "#2a1d14"
 skin: "#d8a57c"

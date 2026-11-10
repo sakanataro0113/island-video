@@ -3,6 +3,7 @@ import { load } from "js-yaml";
 import { catalog, characterByName, looksOf, ofKind, placeByName, type Look } from "./assets";
 import { CAMERAS, TIMES, VERBS } from "./vocab";
 import { VOICE_LEAD, VOICE_TAIL, lengthOf, voiceOf, type Voice } from "./voice";
+import { isLatin, lang as currentLang, type Lang } from "./lang";
 export { CAMERAS, TIMES, VERBS };
 const TARGETED = new Set<string>(["詰め寄る", "殴る", "引っ張り合う", "激しく引っ張り合う"]);
 
@@ -16,12 +17,13 @@ export type CameraOrbit = { kind: "orbit"; center: V3; radius: number; height: n
 export type Prop = { asset: string; state?: string; flap?: [string, string]; scale: number; facePath: boolean; yaw: number; between?: [string, string]; grow?: [number, number]; riders?: { count: number; seed: number; palette?: string }; height: number; path: { t: number; at: [number, number, number] }[] };
 export type Action = { actor: string; verb: (typeof VERBS)[number]; target?: string; start: number; end: number };
 export type Scene = { place: string; time: (typeof TIMES)[number]; camera: (typeof CAMERAS)[number] | CameraMove | CameraPath | CameraOrbit; cast: string[]; positions: Record<string, [number, number]>; faces: Record<string, number>; props: Prop[]; population?: number; flashback: boolean; caption?: string; speaker?: string; storm: boolean; sea?: [number, number]; hud: boolean; labels: { text: string; sub?: string; x: number; y: number }[]; crowd?: { count: number; seed: number; center: [number, number]; radius: [number, number]; cheer: boolean; lines: { from: [number, number]; to: [number, number]; count: number; face: number; palette?: string; fallAt?: number }[]; palette?: string; tug: boolean; fallAt?: number }; looks: Record<string, Look>; actions: Action[]; narration: string; voice?: Voice; seconds: number; start: number; split?: Scene; speakerTitle?: string };
-export type Script = { title: string; year?: number; population?: number; scenes: Scene[]; duration: number };
+export type Script = { title: string; year?: number; population?: number; scenes: Scene[]; duration: number; lang: Lang };
 
 const includes = <T extends string>(list: readonly T[], v: unknown): v is T => list.includes(v as T);
 
-/** useVoice が true なら、読み上げる声を決め、用意済みの音声の長さに合わせてカットを延ばす。 */
-export function parseScript(text: string, useVoice = false): Script {
+/** useVoice が true なら、読み上げる声を決め、用意済みの音声の長さに合わせてカットを延ばす。
+ *  lang が en なら、各カットの en: { narration, caption, labels, speaker_title } と title_en を使う。映像と出来事は共通。 */
+export function parseScript(text: string, useVoice = false, lang: Lang = currentLang): Script {
   let raw: any;
   try { raw = load(text); } catch (e) { throw new Error("台本の書き方に誤りがあります: " + (e as Error).message.split("\n")[0]); }
   if (!raw || typeof raw !== "object") throw new Error("台本が空です。");
@@ -30,6 +32,7 @@ export function parseScript(text: string, useVoice = false): Script {
   if (raw.year !== undefined && !Number.isInteger(raw.year)) throw new Error("year は整数で書いてください。");
   const year: number | undefined = raw.year;
   if (raw.population !== undefined && !Number.isInteger(raw.population)) throw new Error("population は整数で書いてください。");
+  if (lang === "en" && (typeof raw.title_en !== "string" || !raw.title_en.trim())) throw new Error("英語版の題名(title_en)を書いてください。");
   let start = 0;
   /** 1カットを読む。isSplit のときは、画面を斜めに分けた下側の映像として読む(字幕と時間は親のカットに従う)。 */
   const parseScene = (s: any, i: number, isSplit = false): Scene => {
@@ -71,6 +74,16 @@ export function parseScript(text: string, useVoice = false): Script {
     }
         if (typeof s.seconds !== "number" || !(s.seconds > 0) || s.seconds > 120) throw new Error(`${at}seconds は120以下の正の数にしてください。`);
     if (typeof s.narration !== "string") throw new Error(`${at}narration を書いてください。`);
+    // 言語ごとの文字。英語版は en: の中を使い、日本語に字幕があるのに英語がなければ止める
+    const en = s.en && typeof s.en === "object" ? s.en : {};
+    if (lang === "en" && !isSplit) {
+      if (s.narration.trim() && (typeof en.narration !== "string" || !en.narration.trim())) throw new Error(`${at}英語の字幕(en.narration)がありません。`);
+      if (s.caption !== undefined && typeof en.caption !== "string") throw new Error(`${at}英語の日数の札(en.caption)がありません。`);
+      if ((s.labels ?? []).length && (!Array.isArray(en.labels) || en.labels.length !== s.labels.length)) throw new Error(`${at}英語の札(en.labels)を、日本語の labels と同じ数だけ書いてください。`);
+    }
+    const narration: string = lang === "en" && !isSplit && s.narration.trim() ? String(en.narration) : s.narration;
+    const caption: string | undefined = s.caption === undefined ? undefined : lang === "en" ? String(en.caption ?? s.caption) : s.caption;
+    const labelsRaw: any[] = (s.labels ?? []).map((l: any, k: number) => lang === "en" && en.labels?.[k] ? { ...l, text: en.labels[k].text ?? l.text, sub: en.labels[k].sub ?? (l.sub === undefined ? undefined : "") } : l);
     const lines: unknown[] = s.actions ?? [];
     if (!Array.isArray(lines)) throw new Error(`${at}actions は一覧で書いてください。`);
     const pattern = new RegExp(`^(.+?)が(?:(.+?)[にをと])?(${VERBS.join("|")})$`);
@@ -103,10 +116,11 @@ export function parseScript(text: string, useVoice = false): Script {
       if (q.between && !q.between.every((n: string) => s.cast.includes(n))) throw new Error(`${at}小物「${q.asset}」の between の人物が cast にいません。`);
       return { asset: q.asset, state: q.state, flap: q.flap, scale: Number(q.scale ?? 1), facePath: !!q.face_path, yaw: Number(q.yaw ?? 0), between: q.between, height: Number(q.height ?? 1.2), path, grow: q.grow, riders: q.riders ? { count: Number(q.riders.count), seed: Number(q.riders.seed ?? 1), palette: q.riders.palette } : undefined }
     });
-    const voice = useVoice ? voiceOf(s.narration, s.speaker) : undefined, spoken = voice && lengthOf(voice);
-    const seconds = Math.max(readingTime(s.narration, s.seconds), spoken ? VOICE_LEAD + spoken + VOICE_TAIL : 0);
-    const scene: Scene = { place: s.place, time: s.time, camera, cast: s.cast, positions, faces: Object.fromEntries(Object.entries(s.faces ?? {}).map(([k, v]) => [k, Number(v) * Math.PI / 180])), flashback: !!s.flashback, storm: !!s.storm, sea: s.sea, hud: s.hud !== false, caption: s.caption, speaker: s.speaker, labels: (s.labels ?? []).map((l: any) => ({ text: String(l.text), sub: l.sub, x: Number(l.x ?? .5), y: Number(l.y ?? .3) })), crowd: s.crowd ? { count: Number(s.crowd.count), seed: Number(s.crowd.seed ?? 1), center: s.crowd.center ?? [0, 0], radius: s.crowd.radius ?? [0, 0], cheer: !!s.crowd.cheer, lines: (s.crowd.lines ?? []).map((l: any) => ({ from: l.from, to: l.to, count: Number(l.count), face: Number(l.face) * Math.PI / 180, palette: l.palette, fallAt: l.fall_at })), palette: s.crowd.palette, tug: !!s.crowd.tug, fallAt: s.crowd.fall_at } : undefined, props, population: s.population ?? raw.population, looks, actions, narration: s.narration, voice, seconds, start };
-    if (s.speaker_title !== undefined) scene.speakerTitle = String(s.speaker_title);
+    const voice = useVoice ? voiceOf(narration, s.speaker, lang) : undefined, spoken = voice && lengthOf(voice);
+    const seconds = Math.max(readingTime(narration, s.seconds), spoken ? VOICE_LEAD + spoken + VOICE_TAIL : 0);
+    const scene: Scene = { place: s.place, time: s.time, camera, cast: s.cast, positions, faces: Object.fromEntries(Object.entries(s.faces ?? {}).map(([k, v]) => [k, Number(v) * Math.PI / 180])), flashback: !!s.flashback, storm: !!s.storm, sea: s.sea, hud: s.hud !== false, caption, speaker: s.speaker, labels: labelsRaw.map((l: any) => ({ text: String(l.text), sub: l.sub, x: Number(l.x ?? .5), y: Number(l.y ?? .3) })), crowd: s.crowd ? { count: Number(s.crowd.count), seed: Number(s.crowd.seed ?? 1), center: s.crowd.center ?? [0, 0], radius: s.crowd.radius ?? [0, 0], cheer: !!s.crowd.cheer, lines: (s.crowd.lines ?? []).map((l: any) => ({ from: l.from, to: l.to, count: Number(l.count), face: Number(l.face) * Math.PI / 180, palette: l.palette, fallAt: l.fall_at })), palette: s.crowd.palette, tug: !!s.crowd.tug, fallAt: s.crowd.fall_at } : undefined, props, population: s.population ?? raw.population, looks, actions, narration, voice, seconds, start };
+    const title = lang === "en" ? en.speaker_title : s.speaker_title;
+    if (title !== undefined) scene.speakerTitle = String(title);
     if (!isSplit && s.split !== undefined) {
       if (!s.split || typeof s.split !== "object") throw new Error(`${at}split には、下側に映す場所、時間帯、カメラを書いてください。`);
       scene.split = { ...parseScene({ cast: [], ...s.split, narration: "", seconds: s.seconds, hud: false }, i, true), start, seconds };
@@ -115,7 +129,7 @@ export function parseScript(text: string, useVoice = false): Script {
     return scene;
   };
   const scenes = raw.scenes.map((s: any, i: number) => parseScene(s, i));
-  return { title: raw.title, year, population: raw.population, scenes, duration: start };
+  return { title: lang === "en" ? raw.title_en : raw.title, year, population: raw.population, scenes, duration: start, lang };
 }
 
 export function sceneAt(script: Script, t: number): Scene {
@@ -123,9 +137,11 @@ export function sceneAt(script: Script, t: number): Scene {
 }
 
 /** 字幕を読み切れる長さ。台本の seconds より短くはしない(動きの速さは変えず、場面の終わりを延ばす)。
- *  目安: 見る間 0.6秒 + 1秒に5文字。記号 / [ ] は数えない。 */
-export const READ_LEAD = 0.6, READ_CPS = 5;
+ *  目安: 見る間 0.6秒 + 1秒に5文字(英語は1秒に2.8語)。記号 / [ ] は数えない。 */
+export const READ_LEAD = 0.6, READ_CPS = 5, READ_WPS = 2.8;
 export function readingTime(narration: string, seconds: number) {
+  // 英語は語数で数える(1秒に2.8語。実際に見て調整する)
+  if (isLatin(narration)) { const n = narration.replace(/[\[\]]/g, "").split(/\s+/).filter(w => /[A-Za-z0-9]/.test(w)).length; return n ? Math.max(seconds, READ_LEAD + n / READ_WPS) : seconds; }
   const chars = [...narration.replace(/[\/\[\]\s]/g, "")].length;
   return chars ? Math.max(seconds, READ_LEAD + chars / READ_CPS) : seconds;
 }

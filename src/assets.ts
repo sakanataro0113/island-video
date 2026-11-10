@@ -14,7 +14,7 @@ export type Part = PartBase & (
   | { shape: "loft"; sections: [number, number, number, number][] });
 type Base = { id: string; kind: Kind; name: string; tags: string[]; source: string; raw: string; states: string[] };
 export type Look = { clothes: Vec3; hair: Vec3; skin: Vec3; height: number; hairStyle: "short" | "long" | "bald"; stoop: number; skirt: boolean; chief: boolean };
-export type CharacterAsset = Base & { kind: "人物"; born: number; died?: number; looks: { name: string; fromAge: number; look: Look }[]; titles: { fromYear: number; text: string }[] };
+export type CharacterAsset = Base & { kind: "人物"; born: number; died?: number; looks: { name: string; fromAge: number; look: Look }[]; titles: { fromYear: number; text: string }[]; nameEn?: string; titlesEn: { fromYear: number; text: string }[] };
 export type ModelAsset = Base & { kind: "建物" | "小物" | "植物"; parts: Record<string, Part[]> };
 export type PlaceAsset = Base & {
   kind: "場所";
@@ -61,8 +61,9 @@ export function parseAsset(raw: string, source: string): Asset {
       look: { clothes: hex(s.clothes ?? d.clothes, "clothes"), hair: hex(s.hair ?? d.hair, "hair"), skin: hex(s.skin ?? d.skin, "skin"), height: num(s.height ?? 1, "height"), hairStyle: (["short", "long", "bald"].includes(s.hair_style ?? d.hair_style) ? (s.hair_style ?? d.hair_style) : "short") as Look["hairStyle"], stoop: num(s.stoop ?? 0, "stoop"), skirt: !!(s.skirt ?? d.skirt), chief: !!(s.chief ?? d.chief) },
     }));
     if (d.died !== undefined) num(d.died, "died");
-    const titles = (Array.isArray(d.titles) ? d.titles : []).map((t: any) => ({ fromYear: num(t?.from_year, "titles.from_year"), text: String(t?.text ?? "") })).filter((t: { text: string }) => t.text).sort((a: { fromYear: number }, b: { fromYear: number }) => a.fromYear - b.fromYear);
-    return { ...base, kind: "人物", born: num(d.born, "born"), died: d.died, looks, titles, states: looks.map((l: { name: string }) => l.name) };
+    const titlesOf = (list: unknown, key: string) => (Array.isArray(list) ? list : []).map((t: any) => ({ fromYear: num(t?.from_year, `${key}.from_year`), text: String(t?.text ?? "") })).filter((t: { text: string }) => t.text).sort((a: { fromYear: number }, b: { fromYear: number }) => a.fromYear - b.fromYear);
+    const titles = titlesOf(d.titles, "titles"), titlesEn = titlesOf(d.titles_en, "titles_en");
+    return { ...base, kind: "人物", born: num(d.born, "born"), died: d.died, looks, titles, titlesEn, nameEn: typeof d.name_en === "string" && d.name_en ? d.name_en : undefined, states: looks.map((l: { name: string }) => l.name) };
   }
   if (d.kind === "場所") {
     const items = (d.items ?? []).map((i: any) => ({ asset: String(i.asset), at: vec(i.at, "items.at"), scale: num(i.scale ?? 1, "items.scale"), rot: num(i.rot ?? 0, "items.rot"), ground: !!i.ground, state: i.state === undefined ? undefined : String(i.state) }));
@@ -117,9 +118,12 @@ export const placeByName = (name: string) => ofKind("場所").find(p => p.name =
 export const looksOf = (c: CharacterAsset, state: string): Look => (c.looks.find(l => l.name === state) ?? c.looks[0]).look;
 
 /** その年の肩書き。年が分からなければ最初の肩書き。 */
-export function titleAt(c: CharacterAsset, year?: number): string {
-  if (!c.titles.length) return "";
-  if (year === undefined) return c.titles[0]!.text;
-  let out = ""; for (const t of c.titles) if (t.fromYear <= year) out = t.text;
+export function titleAt(c: CharacterAsset, year?: number, lang: "ja" | "en" = "ja"): string {
+  const list = lang === "en" ? c.titlesEn : c.titles;
+  if (!list.length) return "";
+  if (year === undefined) return list[0]!.text;
+  let out = ""; for (const t of list) if (t.fromYear <= year) out = t.text;
   return out;
 }
+/** 画面に出す名前。英語版は name_en(なければ日本語の名前)。 */
+export const displayName = (name: string, lang: "ja" | "en" = "ja") => lang === "en" ? characterByName(name)?.nameEn ?? name : name;

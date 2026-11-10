@@ -9,7 +9,7 @@ interface D1Stmt { bind(...values: unknown[]): D1Stmt; all<T = Record<string, un
 interface D1 { prepare(sql: string): D1Stmt; batch(statements: D1Stmt[]): Promise<unknown> }
 interface Env { ASSETS: { fetch(request: Request): Promise<Response> }; GOOGLE_TTS_KEY?: string; GEMINI_API_KEY?: string; DB?: D1 }
 
-const CHIRP = /^ja-JP-Chirp3-HD-[A-Za-z]+$/, GEMINI = /^(?:[A-Za-z]+|voice_[A-Za-z0-9_-]+)$/, MAX_CHARS = 300;
+const CHIRP = /^(?:ja-JP|en-US)-Chirp3-HD-[A-Za-z]+$/, GEMINI = /^(?:[A-Za-z]+|voice_[A-Za-z0-9_-]+)$/, MAX_CHARS = 300;
 const MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"];
 const reply = (status: number, message: string) => new Response(message, { status, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 const audio = (bytes: Uint8Array, type: string) => new Response(bytes, { headers: { "Content-Type": type, "Cache-Control": "private, max-age=31536000, immutable" } });
@@ -71,9 +71,9 @@ function lastAudio(node: unknown): { data: string; mime_type?: string } | undefi
 async function chirp(q: URLSearchParams, text: string, voice: string, env: Env) {
   if (!env.GOOGLE_TTS_KEY) return reply(500, "Cloudflare に GOOGLE_TTS_KEY が設定されていません。README の手順で設定してください。");
   const rate = Number(q.get("rate") ?? "1");
-  if (!CHIRP.test(voice)) return reply(400, "声の名前は ja-JP-Chirp3-HD-○○ の形にしてください。");
+  if (!CHIRP.test(voice)) return reply(400, "声の名前は ja-JP-Chirp3-HD-○○ か en-US-Chirp3-HD-○○ の形にしてください。");
   if (!(rate >= .25 && rate <= 2)) return reply(400, "rate は 0.25〜2 にしてください。");
-  const body = { input: { text }, voice: { languageCode: "ja-JP", name: voice }, audioConfig: { audioEncoding: "MP3", sampleRateHertz: 48000, ...(rate !== 1 ? { speakingRate: rate } : {}) } };
+  const body = { input: { text }, voice: { languageCode: voice.slice(0, 5), name: voice }, audioConfig: { audioEncoding: "MP3", sampleRateHertz: 48000, ...(rate !== 1 ? { speakingRate: rate } : {}) } };
   const res = await fetch("https://texttospeech.googleapis.com/v1/text:synthesize", { method: "POST", headers: { "Content-Type": "application/json", "X-Goog-Api-Key": env.GOOGLE_TTS_KEY }, body: JSON.stringify(body) });
   if (!res.ok) return reply(502, `Google の音声合成がエラーを返しました(${res.status}): ${(await res.text()).slice(0, 400)}`);
   const { audioContent } = await res.json() as { audioContent?: string };
@@ -156,8 +156,10 @@ async function subtitle(request: Request, env: Env) {
   if (!env.DB) return reply(500, "Cloudflare に設定の保存先(D1 の DB)がありません。README の手順で作ってください。");
   const db = env.DB;
   try { await ensureSchema(db); } catch (e) { return reply(500, "D1 の表を用意できませんでした: " + (e as Error).message); }
+  // 字幕の見た目は言語ごとに保存する(日本語は以前と同じ 'subtitle'、英語は 'subtitle_en')
+  const key = new URL(request.url).searchParams.get("lang") === "en" ? "subtitle_en" : "subtitle";
   if (request.method === "GET") {
-    const row = (await db.prepare("SELECT value FROM prefs WHERE key = 'subtitle'").all<{ value: string }>()).results[0];
+    const row = (await db.prepare("SELECT value FROM prefs WHERE key = ?1").bind(key).all<{ value: string }>()).results[0];
     try { return json(row ? JSON.parse(row.value) : null); } catch { return json(null); }
   }
   if (request.method !== "PUT") return reply(405, "GET か PUT で呼んでください。");
@@ -167,6 +169,6 @@ async function subtitle(request: Request, env: Env) {
   try { s = JSON.parse(text); } catch { return reply(400, "字幕の設定を読めませんでした(JSON ではありません)。"); }
   if (!s || typeof s !== "object" || Array.isArray(s)) return reply(400, "字幕の設定の形が正しくありません。");
   for (const v of Object.values(s)) if (!["string", "number", "boolean"].includes(typeof v) || (typeof v === "string" && v.length > 60)) return reply(400, "字幕の設定の値が正しくありません。");
-  await db.batch([db.prepare("INSERT INTO prefs (key, value, updated_at) VALUES ('subtitle', ?1, ?2) ON CONFLICT(key) DO UPDATE SET value = ?1, updated_at = ?2").bind(JSON.stringify(s), new Date().toISOString())]);
+  await db.batch([db.prepare("INSERT INTO prefs (key, value, updated_at) VALUES (?3, ?1, ?2) ON CONFLICT(key) DO UPDATE SET value = ?1, updated_at = ?2").bind(JSON.stringify(s), new Date().toISOString(), key)]);
   return json(s);
 }

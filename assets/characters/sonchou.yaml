@@ -1,6 +1,7 @@
 id: sonchou
 kind: 人物
 name: 村長
+name_en: "Village Chief"
 tags: [はま村, 村長]
 born: -47
 clothes: "#d9c58a"

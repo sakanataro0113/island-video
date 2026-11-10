@@ -1,4 +1,5 @@
-import { DEFAULT_STYLE, FONTS, cleanStyle, onStyleChange, saveStyle, setStyle, style, type SubtitleStyle } from "./subtitle-style";
+import { lang } from "./lang";
+import { defaultStyle, FONTS, cleanStyle, onStyleChange, saveStyle, setStyle, style, type SubtitleStyle } from "./subtitle-style";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, props: Partial<HTMLElementTagNameMap[K]> & { class?: string } = {}, ...kids: (Node | string)[]) => {
@@ -16,7 +17,7 @@ const FIELDS: Field[] = [
   { key: "size", label: "文字の大きさ", kind: "range", min: .03, max: .16, step: .002, show: v => `画面の幅の${(v * 100).toFixed(1)}%` },
   { key: "y", label: "上下の位置", kind: "range", min: .1, max: .95, step: .005, show: v => `上から${pct(v)}` },
   { key: "x", label: "左右の位置", kind: "range", min: .1, max: .9, step: .005, show: v => `左から${pct(v)}` },
-  { key: "chunk", label: "一度に出す文字数", kind: "range", min: 3, max: 30, step: 1, show: v => `${v}字まで`, only: "chunk" },
+  { key: "chunk", label: "一度に出す文字数(英語は語数)", kind: "range", min: 1, max: 30, step: 1, show: v => lang === "en" ? `${v}語まで(英語)` : `${v}字まで`, only: "chunk" },
   { key: "color", label: "文字の色", kind: "color" },
   { key: "accent", label: "強調の色([ ]の語)", kind: "color" },
   { key: "lineHeight", label: "行の高さ(2行のとき)", kind: "range", min: 1, max: 2, step: .05, show: v => `文字の${pct(v)}`, only: "chunk" },
@@ -25,6 +26,7 @@ const FIELDS: Field[] = [
   { key: "boxOpacity", label: "札の白の濃さ", kind: "range", min: 0, max: 1, step: .05, show: pct, only: "box" },
   { key: "shadow", label: "影を付ける", kind: "check", only: "chunk" },
   { key: "pop", label: "出るときに弾ませる", kind: "check", only: "chunk" },
+  { key: "caps", label: "英字を大文字にする", kind: "check", only: "chunk" },
   { key: "speaker", label: "セリフに話者名を出す", kind: "check" },
   { key: "narratorLabel", label: "語りに「歴史家の記録」を出す", kind: "check" },
 ];
@@ -86,7 +88,7 @@ export class SubtitleEditor {
       this.sync();
     };
     $("sub-revert").onclick = () => { this.note = ""; setStyle(this.saved); };
-    $("sub-default").onclick = () => { this.note = "初期値にしました。よければ保存してください。"; setStyle(DEFAULT_STYLE); };
+    $("sub-default").onclick = () => { this.note = "初期値にしました。よければ保存してください。"; setStyle(defaultStyle()); };
     this.sync();
   }
   private row(label: string, input: HTMLElement, out?: HTMLElement, only?: string) {

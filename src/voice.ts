@@ -89,25 +89,26 @@ export function applySpots(text: string, spots = settings.spots) {
   return out + chars.slice(at).join("");
 }
 /** 台本の字幕の文から、字幕の飾りを取る。強調の[ ]、セリフの「」、改行を取る。 */
-export const plainText = (narration: string) => narration.replace(/[\[\]「」]/g, "").replace(/\s*\n\s*/g, "").trim();
+export const plainText = (narration: string) => narration.replace(/[\[\]「」]/g, "").replace(/([\x21-\x7e])\s*\n\s*(?=[\x21-\x7e])/g, "$1 ").replace(/\s*\n\s*/g, "").trim(); // 英字どうしの改行は空白にする
 /** 字幕の文から、実際に読ませる文を作る。 */
 export const speechText = (narration: string) => applySpots(plainText(narration));
 
 /** 窓口(/api/tts)に渡す設定。本文以外の部分。 */
 type Params = Record<string, string>;
 export type Voice = { params: Params; text: string };
-export function paramsOf(e: Entry): Params | undefined {
+export function paramsOf(e: Entry, lang: "ja" | "en" = "ja"): Params | undefined {
   if (engine.engine === "chirp") {
-    // 以前と同じ並びにして、保存済みの Chirp の音声をそのまま使えるようにする
-    const name = e.voice.startsWith("ja-JP-") ? e.voice : /^[A-Za-z]+$/.test(e.voice) ? `ja-JP-Chirp3-HD-${e.voice}` : "";
+    // 以前と同じ並びにして、保存済みの Chirp の音声をそのまま使えるようにする。英語版は en-US の声
+    const region = lang === "en" ? "en-US" : "ja-JP";
+    const name = /^[a-z]{2}-[A-Z]{2}-/.test(e.voice) ? e.voice.replace(/^[a-z]{2}-[A-Z]{2}-/, region + "-") : /^[A-Za-z]+$/.test(e.voice) ? `${region}-Chirp3-HD-${e.voice}` : "";
     return name ? { voice: name, rate: String(engine.rate) } : undefined;
   }
   return { engine: "gemini", model: engine.model, style: e.style, ...(engine.temperature !== undefined ? { temperature: String(engine.temperature) } : {}), voice: e.voice };
 }
 /** カットを誰の声で読むか。読まないカットは undefined。 */
-export function voiceOf(narration: string, speaker?: string): Voice | undefined {
+export function voiceOf(narration: string, speaker?: string, lang: "ja" | "en" = "ja"): Voice | undefined {
   const text = speechText(narration);
-  const e = speaker ? settings.characters[speaker] : settings.narrator, params = e && paramsOf(e);
+  const e = speaker ? settings.characters[speaker] : settings.narrator, params = e && paramsOf(e, lang);
   return text && params ? { params, text } : undefined;
 }
 const urlOf = (v: Voice) => `/api/tts?${new URLSearchParams({ ...v.params, text: v.text })}`;

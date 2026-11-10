@@ -1,12 +1,17 @@
 id: isao
 kind: 人物
 name: イサオ
+name_en: "Isao"
 tags: [はま村, 網田家, 村長]
 born: -35
 # 肩書き。字幕の話者名の下に出す。from_year は「島に来て○年目」
 titles:
   - {from_year: 1, text: 漁師の長}
   - {from_year: 2, text: はま村の村長}
+# 英語版の肩書き
+titles_en:
+  - {from_year: 1, text: "Fishers' chief"}
+  - {from_year: 2, text: "Chief of Shore Village"}
 clothes: "#d9c58a"
 hair: "#8f8b82"
 skin: "#d3a67f"
