@@ -156,7 +156,8 @@ export class Renderer {
     gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   }
   private draw(name:string,m:Mat4,tint:Vec3=[1,1,1],wave=0,alpha=1){ const g=this.gl,o=this.meshes[name]; g.bindVertexArray(o.vao); g.uniformMatrix4fv(this.u.uM,false,m); g.uniform3fv(this.u.uTint,tint); g.uniform1f(this.u.uWave,wave); g.uniform1f(this.u.uAlpha,alpha); g.drawArrays(g.TRIANGLES,0,o.count); }
-  private place(name:string):PlaceAsset{ const place=placeByName(name)!; const key="place:"+place.id; if(!this.meshes[key]) this.add(key,buildPlace(place,catalog.byId)); return place; }
+  private place(name:string,season?:string):PlaceAsset{ const place=placeByName(name)!; const key=this.placeKey(place,season); if(!this.meshes[key]) this.add(key,buildPlace(place,catalog.byId,season)); return place; }
+  private placeKey(place:PlaceAsset,season?:string){ return "place:"+place.id+(season?":"+season:""); }
   private actor(look:Look,pose:Pose,terrain:Terrain|null){
     const {clothes:cloth,hair,skin,height,hairStyle,stoop}=look,legs:Vec3=[.25,.22,.2];
     const y=(pose.y!==undefined?pose.y:terrain?terrainHeight(terrain,pose.x,pose.z):0)+pose.hop;
@@ -271,14 +272,14 @@ export class Renderer {
   }
   /** 1つの場面を描く。clear が false のときは色を消さずに重ねる(画面を分けた下側用)。 */
   private view(scene:Scene,t:number,clear:boolean){
-    const sky=SKIES[scene.time],{eye,at,up,fov}=cameraAt(scene,t),place=this.place(scene.place);
+    const sky=SKIES[scene.time],{eye,at,up,fov}=cameraAt(scene,t),place=this.place(scene.place,scene.season);
     const big=place.terrain.radius>45;
     if(clear) this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120,up,fov);
     else { const g=this.gl; g.clear(g.DEPTH_BUFFER_BIT); this.setup(sky,eye,at,t,big?900:260,sky.sky,big?700:120,up,fov,false); }
     this.gl.depthMask(false); this.gl.uniform1f(this.u.uSky,1); this.gl.uniform3fv(this.u.uSkyTop,sky.top); this.draw("dome",translate(eye[0],eye[1],eye[2])); this.gl.uniform1f(this.u.uSky,0); this.gl.depthMask(true);
     const lv=scene.sea?lerp(scene.sea[0],scene.sea[1],ease((t-scene.start)/scene.seconds)):0;
     this.draw("sea",translate(0,lv,0),[1,1,1],scene.storm?.45:.12);
-    this.draw("place:"+place.id,identity());
+    this.draw(this.placeKey(place,scene.season),identity());
     for(const name of scene.cast) this.actor(scene.looks[name],poseAt(scene,name,t),place.terrain);
     if(scene.crowd) this.crowdAt(scene.crowd,t,place.terrain,t-scene.start);
     for(const p of scene.props) this.prop(p,scene,t);

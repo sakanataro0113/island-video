@@ -1,10 +1,10 @@
 import { load } from "js-yaml";
 
 import { catalog, characterByName, looksOf, ofKind, placeByName, type Look } from "./assets";
-import { CAMERAS, TIMES, VERBS } from "./vocab";
+import { CAMERAS, SEASONS, TIMES, VERBS } from "./vocab";
 import { VOICE_LEAD, VOICE_TAIL, lengthOf, voiceOf, type Voice } from "./voice";
 import { isLatin, lang as currentLang, type Lang } from "./lang";
-export { CAMERAS, TIMES, VERBS };
+export { CAMERAS, SEASONS, TIMES, VERBS };
 const TARGETED = new Set<string>(["詰め寄る", "殴る", "引っ張り合う", "激しく引っ張り合う"]);
 
 type V3 = [number, number, number];
@@ -16,7 +16,7 @@ export type CameraPath = { kind: "path"; points: { at: V3; look?: V3 }[]; fov: n
 export type CameraOrbit = { kind: "orbit"; center: V3; radius: number; height: number; start: number; turns: number; look: V3; fov?: number };
 export type Prop = { asset: string; state?: string; flap?: [string, string]; scale: number; facePath: boolean; yaw: number; between?: [string, string]; grow?: [number, number]; riders?: { count: number; seed: number; palette?: string }; height: number; path: { t: number; at: [number, number, number] }[] };
 export type Action = { actor: string; verb: (typeof VERBS)[number]; target?: string; start: number; end: number };
-export type Scene = { place: string; time: (typeof TIMES)[number]; camera: (typeof CAMERAS)[number] | CameraMove | CameraPath | CameraOrbit; cast: string[]; positions: Record<string, [number, number]>; faces: Record<string, number>; props: Prop[]; population?: number; flashback: boolean; caption?: string; speaker?: string; storm: boolean; sea?: [number, number]; hud: boolean; labels: { text: string; sub?: string; x: number; y: number }[]; crowd?: { count: number; seed: number; center: [number, number]; radius: [number, number]; cheer: boolean; lines: { from: [number, number]; to: [number, number]; count: number; face: number; palette?: string; fallAt?: number }[]; palette?: string; tug: boolean; fallAt?: number }; looks: Record<string, Look>; actions: Action[]; narration: string; voice?: Voice; seconds: number; start: number; split?: Scene; speakerTitle?: string };
+export type Scene = { place: string; time: (typeof TIMES)[number]; camera: (typeof CAMERAS)[number] | CameraMove | CameraPath | CameraOrbit; cast: string[]; positions: Record<string, [number, number]>; faces: Record<string, number>; props: Prop[]; population?: number; flashback: boolean; season?: (typeof SEASONS)[number]; caption?: string; speaker?: string; storm: boolean; sea?: [number, number]; hud: boolean; labels: { text: string; sub?: string; x: number; y: number }[]; crowd?: { count: number; seed: number; center: [number, number]; radius: [number, number]; cheer: boolean; lines: { from: [number, number]; to: [number, number]; count: number; face: number; palette?: string; fallAt?: number }[]; palette?: string; tug: boolean; fallAt?: number }; looks: Record<string, Look>; actions: Action[]; narration: string; voice?: Voice; seconds: number; start: number; split?: Scene; speakerTitle?: string };
 export type Script = { title: string; year?: number; population?: number; scenes: Scene[]; duration: number; lang: Lang };
 
 const includes = <T extends string>(list: readonly T[], v: unknown): v is T => list.includes(v as T);
@@ -39,6 +39,9 @@ export function parseScript(text: string, useVoice = false, lang: Lang = current
     const at = `シーン${i + 1}${isSplit ? "(split)" : ""}: `;
     if (!placeByName(s?.place)) throw new Error(`${at}place は ${ofKind("場所").map(p => p.name).join("、")} から選んでください。`);
     if (!includes(TIMES, s.time)) throw new Error(`${at}time は ${TIMES.join("、")} から選んでください。`);
+    // 季節: 話全体の season を使う。カットに season を書けば上書き(回想など。空の文字列で、いつもの見た目)
+    const season = s.season !== undefined ? s.season : raw.season;
+    if (season !== undefined && season !== "" && !includes(SEASONS, season)) throw new Error(`${at}season は ${SEASONS.join("、")} か、空にしてください。`);
     const vec3 = (v: unknown, label: string) => { if (!Array.isArray(v) || v.length !== 3 || v.some(n => typeof n !== "number")) throw new Error(`${at}${label} は [x, y, z] の形で書いてください。`); return v as [number, number, number]; };
     let camera: Scene["camera"];
     if (includes(CAMERAS, s.camera)) camera = s.camera;
@@ -118,7 +121,7 @@ export function parseScript(text: string, useVoice = false, lang: Lang = current
     });
     const voice = useVoice ? voiceOf(narration, s.speaker, lang) : undefined, spoken = voice && lengthOf(voice);
     const seconds = Math.max(readingTime(narration, s.seconds), spoken ? VOICE_LEAD + spoken + VOICE_TAIL : 0);
-    const scene: Scene = { place: s.place, time: s.time, camera, cast: s.cast, positions, faces: Object.fromEntries(Object.entries(s.faces ?? {}).map(([k, v]) => [k, Number(v) * Math.PI / 180])), flashback: !!s.flashback, storm: !!s.storm, sea: s.sea, hud: s.hud !== false, caption, speaker: s.speaker, labels: labelsRaw.map((l: any) => ({ text: String(l.text), sub: l.sub, x: Number(l.x ?? .5), y: Number(l.y ?? .3) })), crowd: s.crowd ? { count: Number(s.crowd.count), seed: Number(s.crowd.seed ?? 1), center: s.crowd.center ?? [0, 0], radius: s.crowd.radius ?? [0, 0], cheer: !!s.crowd.cheer, lines: (s.crowd.lines ?? []).map((l: any) => ({ from: l.from, to: l.to, count: Number(l.count), face: Number(l.face) * Math.PI / 180, palette: l.palette, fallAt: l.fall_at })), palette: s.crowd.palette, tug: !!s.crowd.tug, fallAt: s.crowd.fall_at } : undefined, props, population: s.population ?? raw.population, looks, actions, narration, voice, seconds, start };
+    const scene: Scene = { place: s.place, time: s.time, camera, cast: s.cast, positions, faces: Object.fromEntries(Object.entries(s.faces ?? {}).map(([k, v]) => [k, Number(v) * Math.PI / 180])), flashback: !!s.flashback, season: season || undefined, storm: !!s.storm, sea: s.sea, hud: s.hud !== false, caption, speaker: s.speaker, labels: labelsRaw.map((l: any) => ({ text: String(l.text), sub: l.sub, x: Number(l.x ?? .5), y: Number(l.y ?? .3) })), crowd: s.crowd ? { count: Number(s.crowd.count), seed: Number(s.crowd.seed ?? 1), center: s.crowd.center ?? [0, 0], radius: s.crowd.radius ?? [0, 0], cheer: !!s.crowd.cheer, lines: (s.crowd.lines ?? []).map((l: any) => ({ from: l.from, to: l.to, count: Number(l.count), face: Number(l.face) * Math.PI / 180, palette: l.palette, fallAt: l.fall_at })), palette: s.crowd.palette, tug: !!s.crowd.tug, fallAt: s.crowd.fall_at } : undefined, props, population: s.population ?? raw.population, looks, actions, narration, voice, seconds, start };
     const title = lang === "en" ? en.speaker_title : s.speaker_title;
     if (title !== undefined) scene.speakerTitle = String(title);
     if (!isSplit && s.split !== undefined) {

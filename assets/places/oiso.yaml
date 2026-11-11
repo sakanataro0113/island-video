@@ -34,6 +34,9 @@ items:
 scatter:
   - {asset: pine, count: 420, seed: 7, ring: [1, 32], scale: [0.8, 1.35]}
   - {asset: bush, count: 130, seed: 21, ring: [1, 31], scale: [0.7, 1.3]}
+  # 広葉樹(秋に紅葉する)。針葉樹に混ぜる
+  - {asset: maple, count: 110, seed: 33, ring: [2, 31], scale: [0.8, 1.25]}
+  - {asset: ginkgo, count: 80, seed: 41, ring: [2, 31], scale: [0.8, 1.2]}
 exclude:
   - {x: [-99, 99], z: [-3.2, 99]}
   - {x: [-4, 14], z: [-9, 99]}

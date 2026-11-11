@@ -106,7 +106,11 @@ function addParts(m: MeshBuilder, parts: Part[], at: Vec3 = [0,0,0], scale = 1, 
 export function buildModel(asset: ModelAsset, state: string): Float32Array { const m = new MeshBuilder(); addParts(m, asset.parts[state] ?? Object.values(asset.parts)[0]); return m.floats(); }
 
 const SAND: Vec3=[.86,.76,.53], GRASS: Vec3=[.42,.62,.33], DARK: Vec3=[.31,.5,.29];
-export function buildPlace(place: PlaceAsset, byId: Map<string, Asset>): Float32Array {
+/** 秋の草。少し黄ばませる。 */
+const GRASS_AUTUMN: Vec3=[.55,.6,.32], DARK_AUTUMN: Vec3=[.42,.47,.27];
+/** 季節に合う状態(素材にその名前の状態があれば)。なければ素材のいつもの状態。 */
+const stateFor = (a: ModelAsset, own: string | undefined, season?: string) => own ?? (season && a.parts[season] ? season : a.states[0]);
+export function buildPlace(place: PlaceAsset, byId: Map<string, Asset>, season?: string): Float32Array {
   const m = new MeshBuilder(), r = rng(7), cell = .72, jit = rng(11), jitter = new Map<string, [number, number]>(), { centerZ, radius } = place.terrain;
   const pt = (i: number, j: number): Vec3 => {
     const key = `${i},${j}`;
@@ -118,12 +122,12 @@ export function buildPlace(place: PlaceAsset, byId: Map<string, Asset>): Float32
   for (let i = -n; i < n; i++) for (let j = -n; j < n; j++) {
     const a=pt(i,j), b=pt(i+1,j), c=pt(i+1,j+1), d=pt(i,j+1), y=(a[1]+b[1]+c[1]+d[1])/4;
     if (y < -.6) continue;
-    const v = .9+r()*.2, base = y < .42 ? SAND : y > 2.2 ? DARK : GRASS, col: Vec3 = [base[0]*v, base[1]*v, base[2]*v];
+    const v = .9+r()*.2, base = y < .42 ? SAND : y > 2.2 ? (season === "秋" ? DARK_AUTUMN : DARK) : (season === "秋" ? GRASS_AUTUMN : GRASS), col: Vec3 = [base[0]*v, base[1]*v, base[2]*v];
     m.tri(a,c,d,col); m.tri(a,b,c,[col[0]*.97,col[1]*.97,col[2]*.97]);
   }
   for (const item of place.items) {
     const a = byId.get(item.asset) as ModelAsset;
-    addParts(m, a.parts[item.state ?? a.states[0]], item.ground ? [item.at[0], item.at[1]+terrainHeight(place.terrain,item.at[0],item.at[2]), item.at[2]] : item.at, item.scale, item.rot);
+    addParts(m, a.parts[stateFor(a, item.state, season)], item.ground ? [item.at[0], item.at[1]+terrainHeight(place.terrain,item.at[0],item.at[2]), item.at[2]] : item.at, item.scale, item.rot);
   }
   const taken: [number, number, number][] = [];
   for (const s of place.scatter) {
@@ -135,7 +139,7 @@ export function buildPlace(place: PlaceAsset, byId: Map<string, Asset>): Float32
       const r = s.spacing*sc;
       if (r > 0 && taken.some(([tx,tz,tr]) => Math.hypot(tx-x,tz-z) < r+tr)) { q(); continue; }
       if (r > 0) taken.push([x,z,r]);
-      addParts(m, a.parts[a.states[0]], [x, terrainHeight(place.terrain,x,z), z], sc, q()*360);
+      addParts(m, a.parts[stateFor(a, undefined, season)], [x, terrainHeight(place.terrain,x,z), z], sc, q()*360);
     }
   }
   return m.floats();

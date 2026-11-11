@@ -1,0 +1,19 @@
+id: salmon
+kind: 小物
+name: 鮭
+tags: [川の幸, 秋, 争いの種]
+# 秋に海から川を上る鮭。背は暗い緑、横腹は赤紫に黒っぽい縞(産卵期の色)。雄は鼻先が曲がる
+states:
+  - name: 通常
+    parts:
+      - {shape: sphere, at: [0, 0, 0], scale: [0.085, 0.13, 0.38], detail: 2, jitter: 0.02, seed: 5, color: "#9a4a4a"}
+      - {shape: sphere, at: [0, 0.04, 0], scale: [0.07, 0.1, 0.36], detail: 1, jitter: 0.01, seed: 6, color: "#3f4b33"}
+      - {shape: sphere, at: [0, -0.05, 0.02], scale: [0.07, 0.07, 0.3], detail: 1, seed: 7, color: "#d9c7b2"}
+      - {shape: box, at: [0, 0.0, 0.12], size: [0.168, 0.13, 0.035], color: "#5b2f3c"}
+      - {shape: box, at: [0, 0.0, -0.02], size: [0.17, 0.14, 0.035], color: "#5b2f3c"}
+      - {shape: box, at: [0, 0.0, -0.16], size: [0.15, 0.11, 0.035], color: "#5b2f3c"}
+      - {shape: cone, at: [0, 0, -0.33], radius: 0.13, height: 0.2, sides: 6, rot: [-90, 0, 0], color: "#3f4b33"}
+      - {shape: cone, at: [0, 0.12, 0.0], radius: 0.05, height: 0.1, sides: 5, color: "#3f4b33"}
+      - {shape: cone, at: [0, 0.03, 0.4], radius: 0.035, height: 0.1, sides: 5, rot: [100, 0, 0], color: "#6b3a3a"}
+      - {shape: box, at: [0.078, 0.04, 0.27], size: [0.02, 0.03, 0.03], color: "#111418"}
+      - {shape: box, at: [-0.078, 0.04, 0.27], size: [0.02, 0.03, 0.03], color: "#111418"}

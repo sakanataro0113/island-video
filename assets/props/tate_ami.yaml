@@ -1,0 +1,38 @@
+id: tate_ami
+kind: 小物
+name: 張り網
+tags: [はま村, 漁具]
+# 海に立てる網。浮きの列が水面に並び、網は水の中へ垂れる。両端に杭。原点が西の杭で、東(+x)へ延びる
+states:
+  - name: 通常
+    parts:
+      - {shape: cylinder, at: [0, -0.8, 0], radius: 0.06, top: 0.05, height: 2.1, sides: 6, color: "#6b4a2e"}
+      - {shape: cylinder, at: [3.2, -0.8, 0], radius: 0.06, top: 0.05, height: 2.1, sides: 6, color: "#6b4a2e"}
+      - {shape: box, at: [1.6, 0.08, 0], size: [3.2, 0.03, 0.03], color: "#c9b48a"}
+      - {shape: sphere, at: [0.2, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [0.55, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [0.9, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [1.25, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [1.6, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [1.95, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [2.3, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [2.65, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: sphere, at: [3.0, 0.1, 0], scale: [0.11, 0.08, 0.11], detail: 1, color: "#d9862f"}
+      - {shape: box, at: [0.1, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [0.31, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [0.53, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [0.74, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [0.96, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [1.17, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [1.39, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [1.6, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [1.81, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [2.03, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [2.24, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [2.46, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [2.67, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [2.89, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [3.1, -0.25, 0], size: [0.015, 0.7, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [1.6, -0.05, 0], size: [3.2, 0.015, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [1.6, -0.3, 0], size: [3.2, 0.015, 0.015], color: "#5a4a34"}
+      - {shape: box, at: [1.6, -0.55, 0], size: [3.2, 0.015, 0.015], color: "#5a4a34"}
