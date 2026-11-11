@@ -25,10 +25,12 @@ export type Spot = { start: number; length: number; to: string };
 /** spots は、字幕の飾りを除いた文ごとの、読みを変えた箇所。同じ漢字でも、ほかの文や箇所は変わらない。 */
 export type Settings = { narrator: Entry; characters: Record<string, Entry>; spots: Record<string, Spot[]> };
 
-type Engine = { engine: "gemini" | "chirp"; model: string; temperature?: number; rate: number };
+type Engine = { engine: "gemini" | "chirp"; model: string; temperature?: number; rate: number; rpm: number };
 export const voiceErrors: string[] = [];
 const file: any = (() => { try { return yaml.load(raw) ?? {}; } catch (e) { voiceErrors.push("voices.yaml を読めません: " + (e as Error).message); return {}; } })();
 
+/** 1分あたりに頼む回数。Chirp は上限がゆるいので気にしない。 */
+const engine_rpm = (name: string, rpm: number) => name === "chirp" ? 600 : rpm >= 1 && rpm <= 1000 ? rpm : 8;
 export const engine: Engine = (() => {
   const name = file.engine === "chirp" ? "chirp" : "gemini";
   if (file.engine !== "gemini" && file.engine !== "chirp") voiceErrors.push(`voices.yaml の engine「${file.engine}」は gemini か chirp にしてください。`);
@@ -38,7 +40,9 @@ export const engine: Engine = (() => {
   if (t !== undefined && !(t >= 0 && t <= 2)) voiceErrors.push("voices.yaml の gemini.temperature は 0〜2 にしてください。");
   const rate = Number(file.chirp?.rate ?? 1);
   if (!(rate >= .25 && rate <= 2)) voiceErrors.push("voices.yaml の chirp.rate は 0.25〜2 にしてください。");
-  return { engine: name, model: MODELS.includes(model) ? model : MODELS[0]!, temperature: t !== undefined && t >= 0 && t <= 2 ? t : undefined, rate: rate >= .25 && rate <= 2 ? rate : 1 };
+  const rpm = Number(file.gemini?.rpm ?? 8);
+  if (!(rpm >= 1 && rpm <= 1000)) voiceErrors.push("voices.yaml の gemini.rpm は 1〜1000 にしてください。");
+  return { rpm: engine_rpm(name, rpm), engine: name, model: MODELS.includes(model) ? model : MODELS[0]!, temperature: t !== undefined && t >= 0 && t <= 2 ? t : undefined, rate: rate >= .25 && rate <= 2 ? rate : 1 };
 })();
 
 const entryOf = (v: any): Entry => typeof v === "string" ? { voice: v, style: "" } : { voice: String(v?.voice ?? ""), style: String(v?.style ?? "") };
@@ -119,16 +123,26 @@ const pending = new Map<string, Promise<AudioBuffer>>();
 export const audioOf = (v: Voice | undefined) => v && buffers.get(voiceKey(v));
 export const lengthOf = (v: Voice) => buffers.get(voiceKey(v))?.duration;
 
+/** 依頼の間を空けて、1分あたり engine.rpm 回を超えないようにする(voices.yaml の gemini.rpm)。 */
+let nextSlot = 0;
+async function slot() {
+  const at = Math.max(Date.now(), nextSlot);
+  nextSlot = at + 60000 / engine.rpm;
+  if (at > Date.now()) await new Promise(r => setTimeout(r, at - Date.now()));
+}
 async function fetchAudio(v: Voice): Promise<AudioBuffer> {
   const url = urlOf(v);
   let bytes: ArrayBuffer | null = null;
   let store: Cache | null = null;
   try { store = await caches.open("tts-v1"); bytes = await (await store.match(url))?.arrayBuffer() ?? null; } catch { store = null; }
   if (!bytes) {
+    await slot();
     let res = await fetch(url);
-    // 1分あたりの上限なら、言われた秒数だけ待って3回までやり直す(1日の上限なら待たずに止める)
-    for (let tries = 0; res.status === 429 && res.headers.get("X-Quota") === "minute" && tries < 3; tries++) {
-      await new Promise(r => setTimeout(r, Number(res.headers.get("Retry-After") ?? 30) * 1000));
+    // 1分あたりの上限なら、言われた秒数だけ待って8回までやり直す(1日の上限なら待たずに止める)
+    for (let tries = 0; res.status === 429 && res.headers.get("X-Quota") === "minute" && tries < 8; tries++) {
+      const wait = Number(res.headers.get("Retry-After") ?? 30) * 1000;
+      nextSlot = Math.max(nextSlot, Date.now() + wait); // ほかの依頼も一緒に待たせる
+      await slot();
       res = await fetch(url);
     }
     if (!res.ok) throw new Error(res.status === 404 ? "音声の窓口(/api/tts)が見つかりません。Cloudflareに公開したサイトで使ってください。" : await res.text());

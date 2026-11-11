@@ -13,6 +13,9 @@ gemini:
   # 低すぎると無音や失敗が起きるという報告があり、Google は標準のままを勧めている。
   # 無音の音声は自動で弾くので、試しに下げてよい
   temperature: 0.5
+  # 1分あたりに頼む回数の上限。AI Studio の Rate limit のページ(aistudio.google.com/rate-limit)で、
+  # このモデルの RPM を見て、それより少し小さくする。間を空けて頼むので、1話34カットなら rpm 8 で約4分
+  rpm: 8
 
 # Chirp 3: HD(Google Cloud TTS、毎月100万字まで無料。キーは Cloudflare の GOOGLE_TTS_KEY)。
 # 声の名前は Gemini と共通(Alnilam なら ja-JP-Chirp3-HD-Alnilam を使う)。話し方の指示(style)は使われない
